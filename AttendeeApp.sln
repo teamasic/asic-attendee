@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AttendeeApp", "AttendeeApp\AttendeeApp.csproj", "{B4A906BD-71AA-4DD3-9044-BA11387C1BDB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AttendanceSystemIPCamera", "AttendanceSystemIPCamera\AttendanceSystemIPCamera.csproj", "{4290521F-6F6E-4044-B014-E1D720F1CBE9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B4A906BD-71AA-4DD3-9044-BA11387C1BDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4A906BD-71AA-4DD3-9044-BA11387C1BDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4A906BD-71AA-4DD3-9044-BA11387C1BDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4A906BD-71AA-4DD3-9044-BA11387C1BDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4290521F-6F6E-4044-B014-E1D720F1CBE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4290521F-6F6E-4044-B014-E1D720F1CBE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4290521F-6F6E-4044-B014-E1D720F1CBE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4290521F-6F6E-4044-B014-E1D720F1CBE9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CEA81D53-B019-4220-B5C8-69C36EC12A03}
+	EndGlobalSection
+EndGlobal
