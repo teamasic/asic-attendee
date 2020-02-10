@@ -7,6 +7,7 @@
     <IsPackable>false</IsPackable>
     <SpaRoot>ClientApp\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
+    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,12 +34,26 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\models\ApiResponse.js" />
+    <None Remove="ClientApp\src\models\ApiResponse.js.map" />
     <None Remove="ClientApp\src\models\ApiResponse.ts" />
+    <None Remove="ClientApp\src\models\Group.js" />
+    <None Remove="ClientApp\src\models\Group.js.map" />
     <None Remove="ClientApp\src\models\Group.ts" />
+    <None Remove="ClientApp\src\services\group.js" />
+    <None Remove="ClientApp\src\services\group.js.map" />
     <None Remove="ClientApp\src\services\group.ts" />
+    <None Remove="ClientApp\src\store\group\actionCreators.js" />
+    <None Remove="ClientApp\src\store\group\actionCreators.js.map" />
     <None Remove="ClientApp\src\store\group\actionCreators.ts" />
+    <None Remove="ClientApp\src\store\group\reducers.js" />
+    <None Remove="ClientApp\src\store\group\reducers.js.map" />
     <None Remove="ClientApp\src\store\group\reducers.ts" />
+    <None Remove="ClientApp\src\store\group\state.js" />
+    <None Remove="ClientApp\src\store\group\state.js.map" />
     <None Remove="ClientApp\src\store\group\state.ts" />
+    <None Remove="ClientApp\src\store\index.js" />
+    <None Remove="ClientApp\src\store\index.js.map" />
   </ItemGroup>
 
   <ItemGroup>
