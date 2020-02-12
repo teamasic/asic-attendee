@@ -44,7 +44,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
                 Console.WriteLine("Server: " + msg);
 
                 //send
-                communicator.Send(Encoding.ASCII.GetBytes("Received"));
+                communicator.Send(Encoding.UTF8.GetBytes("Received"));
             }
         }
 

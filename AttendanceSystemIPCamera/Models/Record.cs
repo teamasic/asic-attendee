@@ -12,7 +12,9 @@ namespace AttendanceSystemIPCamera.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        public int AttendeeId { get; set; }
         public Attendee Attendee { get; set; }
+        public int SessionId { get; set; }
         public Session Session { get; set; }
         public bool Present { get; set; }
     }

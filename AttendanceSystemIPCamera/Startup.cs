@@ -15,6 +15,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
+using System.Collections.Generic;
 
 namespace AttendanceSystemIPCamera
 {
@@ -42,6 +44,8 @@ namespace AttendanceSystemIPCamera
             SetupAutoMapper(services);
             SetupDependencyInjection(services);
             SetupBackgroundService(services);
+            setupSwagger(services);
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,9 +62,19 @@ namespace AttendanceSystemIPCamera
                 app.UseHsts();
             }
 
+            app.UseCors(options =>
+            {
+                options.AllowAnyMethod();
+                options.AllowAnyOrigin();
+                options.AllowAnyHeader();
+            });
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ASIC API"));
 
             app.UseRouting();
 
@@ -82,19 +96,24 @@ namespace AttendanceSystemIPCamera
             });
         }
 
+        private void setupSwagger(IServiceCollection services)
+        {
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ASIC API", Version = "v1" });
+            });
+        }
+
         private void SetupDatabaseContext(IServiceCollection services)
         {
             services.AddDbContext<MainDbContext>(options => options.UseSqlite(Configuration.GetConnectionString("SqliteDB")));
         }
         private void SetupAutoMapper(IServiceCollection services)
         {
-            var mappingConfig = new MapperConfiguration(mc =>
+            Mapper.Initialize(cfg =>
             {
-                mc.AddProfile(new MapperProfile());
+                cfg.AddProfile(new MapperProfile());
             });
-
-            IMapper mapper = mappingConfig.CreateMapper();
-            services.AddSingleton(mapper);
         }
 
         private void SetupDependencyInjection(IServiceCollection services)
@@ -102,11 +121,12 @@ namespace AttendanceSystemIPCamera
             services.AddHttpContextAccessor();
 
             services.AddSingleton(Configuration);
-            // services.AddSingleton<IMapper>(Mapper.Instance);
+            services.AddSingleton<IMapper>(Mapper.Instance);
 
             services.AddScoped<DbContext, MainDbContext>();
             services.AddScoped<IGroupService, GroupService>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IAttendeeService, AttendeeService>();
+            services.AddScoped<MyUnitOfWork>();
             services.AddScoped<GroupValidation>();
         }
 
