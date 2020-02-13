@@ -18,7 +18,6 @@ const reducers: Reducer<AttendeeState> = (state: AttendeeState | undefined, inco
     if (state === undefined) {
         return unloadedState;
     }
-
     const action = incomingAction;
     switch (action.type) {
         case ACTIONS.START_REQUEST_LOGIN:
@@ -35,6 +34,7 @@ const reducers: Reducer<AttendeeState> = (state: AttendeeState | undefined, inco
             };
         case ACTIONS.RECEIVE_SUCCESS_LOGIN:
             return {
+                ...state,
                 attendee: action.attendee,
                 isLoading: false,
                 successfullyLoaded: true

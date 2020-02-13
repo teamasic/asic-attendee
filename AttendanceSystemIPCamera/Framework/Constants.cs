@@ -19,6 +19,8 @@ namespace AttendanceSystemIPCamera.Framework
 
             public const string LOGIN_FAIL = "User credential is not valid.";
             public const string CANNOT_GET_LOCAL_IP_ADDRESS = "Cannot get local ip address.";
+
+            public static string ATTENDEE_NOT_FOUND = "Attendee not found";
         }
     }
 }

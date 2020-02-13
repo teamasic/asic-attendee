@@ -5,6 +5,7 @@ export const constants = {
 }
 
 export const attendanceData = [
+    //      [start, end)
     {
         id: 0,
         title: '13.000.000 VNĐ',

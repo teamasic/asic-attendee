@@ -14,8 +14,11 @@ export default () => {
     if (authData) {
         return (
             <Layout>
-                <Redirect exact to='/record'/>
+                <Route exact path='/'>
+                    <Redirect exact to='/record' />
+                </Route>
                 <Route exact path="/record" component={Record} />
+                <Route exact path="/dashboard" component={Dashboard} />
             </Layout>
         );
     } else {

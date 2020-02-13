@@ -1,6 +1,7 @@
 ﻿using AttendanceSystemIPCamera.Models;
 using AttendanceSystemIPCamera.Services.GroupService;
 using AttendanceSystemIPCamera.Services.NetworkService;
+using AttendanceSystemIPCamera.Services.RecordService;
 using AttendanceSystemIPCamera.Services.SessionService;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,19 @@ namespace AttendanceSystemIPCamera.Repositories.UnitOfWork
         private IGroupRepository groupRepository;
         private ISessionRepository sessionRepository;
         private IAttendeeRepository attendeeRepository;
+        private IRecordRepository recordRepository;
 
+        public IRecordRepository RecordRepository
+        {
+            get
+            {
+                if (recordRepository == null)
+                {
+                    recordRepository = new RecordRepository(DbContext);
+                }
+                return recordRepository;
+            }
+        }
         public IAttendeeRepository AttendeeRepository
         {
             get
@@ -68,6 +81,19 @@ namespace AttendanceSystemIPCamera.Repositories.UnitOfWork
         private IGroupService groupService;
         private ISessionService sessionService;
         private IAttendeeNetworkService attendeeNetworkService;
+        private IRecordService recordService;
+
+        public IRecordService RecordService
+        {
+            get
+            {
+                if (recordService == null)
+                {
+                    recordService = new RecordService(this);
+                }
+                return recordService;
+            }
+        }
 
         public IAttendeeNetworkService AttendeeNetworkService
         {

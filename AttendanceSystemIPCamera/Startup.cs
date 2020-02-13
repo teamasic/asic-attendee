@@ -5,6 +5,7 @@ using AttendanceSystemIPCamera.Framework.ViewModels;
 using AttendanceSystemIPCamera.Models;
 using AttendanceSystemIPCamera.Repositories.UnitOfWork;
 using AttendanceSystemIPCamera.Services.GroupService;
+using AttendanceSystemIPCamera.Services.RecordService;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -85,15 +86,15 @@ namespace AttendanceSystemIPCamera
                     pattern: "{controller}/{action=Index}/{id?}");
             });
 
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
+            //app.UseSpa(spa =>
+            //{
+            //    spa.Options.SourcePath = "ClientApp";
 
-                if (env.IsDevelopment())
-                {
-                    spa.UseReactDevelopmentServer(npmScript: "start");
-                }
-            });
+            //    if (env.IsDevelopment())
+            //    {
+            //        spa.UseReactDevelopmentServer(npmScript: "start");
+            //    }
+            //});
         }
 
         private void setupSwagger(IServiceCollection services)
@@ -126,6 +127,7 @@ namespace AttendanceSystemIPCamera
             services.AddScoped<DbContext, MainDbContext>();
             services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IAttendeeService, AttendeeService>();
+            services.AddScoped<IRecordService, RecordService>();
             services.AddScoped<MyUnitOfWork>();
             services.AddScoped<GroupValidation>();
         }

@@ -20,7 +20,7 @@ interface LoginComponentState {
     attendeeCode: string
 }
 
-const redirectLocation = '/dashboard';
+const redirectLocation = '/record';
 
 class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
     constructor(props: AttendeeProps) {
@@ -28,6 +28,8 @@ class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
         this.state = {
             attendeeCode: ""
         };
+        console.log(this.props);
+        console.log(this.state);
     }
 
     redirect = () => {

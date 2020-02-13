@@ -1,22 +1,52 @@
 import { Reducer, Action, AnyAction } from "redux";
 import { RecordState } from "./recordState";
-
+import { ACTIONS } from './recordActionCreators';
 
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
 
 const unloadedState: RecordState = {
     isLoading: false,
     successfullyLoaded: false,
+    recordSearch: {
+        attendeeId: 0,
+        startTime: new Date(),
+        endTime: new Date()
+    },
+    recordData: [{
+        id: 0,
+        duration: 0,
+        groupCode: "",
+        startTime: new Date()
+    }]
 };
 
 const reducers: Reducer<RecordState> = (state: RecordState | undefined, incomingAction: AnyAction): RecordState => {
     if (state === undefined) {
         return unloadedState;
     }
-
     const action = incomingAction;
     switch (action.type) {
-        
+        case ACTIONS.START_REQUEST_RECORDS:
+            return {
+                ...state,
+                isLoading: true,
+                successfullyLoaded: false,
+                recordSearch: action.recordSearch
+            };
+        case ACTIONS.STOP_REQUEST_RECORDS_WITH_ERRORS:
+            return {
+                ...state,
+                isLoading: false,
+                successfullyLoaded: false
+            };
+        case ACTIONS.RECEIVE_RECORDS_DATA:
+            console.log("reducer: " +action.records)
+            return {
+                ...state,
+                isLoading: false,
+                successfullyLoaded: true,
+                recordData: action.records
+            };
     }
 
     return state;
