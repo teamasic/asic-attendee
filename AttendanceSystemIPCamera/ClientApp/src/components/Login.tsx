@@ -85,9 +85,5 @@ const matchDispatchToProps = (dispatch: any) => {
     return bindActionCreators(attendeeActionCreators, dispatch);
 }
 
-const mapStateToProps = (state: ApplicationState) => {
-    return { state: state.attendee };
-}
-
-export default connect(mapStateToProps, matchDispatchToProps)(Login);
+export default connect((state: ApplicationState) => state.attendee, matchDispatchToProps)(Login);
 

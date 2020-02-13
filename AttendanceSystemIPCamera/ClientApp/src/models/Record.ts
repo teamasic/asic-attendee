@@ -3,6 +3,7 @@
     groupCode: string;
     startTime: Date;
     duration: number;
+    present: boolean
 }
 
 export interface RecordViewModel{

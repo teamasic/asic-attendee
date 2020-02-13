@@ -18,6 +18,7 @@ namespace AttendanceSystemIPCamera.Framework.ViewModels
         public string GroupCode { get; set; }
         public DateTime StartTime { get; set; }
         public int Duration { get; set; }
+        public bool Present { get; set; }
     }
 
     public class RecordSearchViewModel

@@ -40,7 +40,8 @@ namespace AttendanceSystemIPCamera.Services.RecordService
                     Id = r.Id,
                     StartTime = r.Session.StartTime,
                     Duration = r.Session.Duration,
-                    GroupCode = r.Session.Group.Code
+                    GroupCode = r.Session.Group.Code,
+                    Present = r.Present
                 }).ToList();
                 return recordAttendanceViewModel;
             }

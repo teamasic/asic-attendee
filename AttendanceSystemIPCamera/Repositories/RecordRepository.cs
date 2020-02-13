@@ -22,8 +22,8 @@ namespace AttendanceSystemIPCamera.Repositories
         public List<Record> GetByRecordSearch(RecordSearchViewModel search)
         {
             var records = dbSet.Where(r => r.AttendeeId == search.AttendeeId)
-                .Where(r => r.Session.StartTime >= search.StartTime)
-                .Where(r => r.Session.StartTime < search.EndTime)
+                .Where(r => r.Session.StartTime > search.StartTime)
+                .Where(r => r.Session.StartTime <= search.EndTime)
                 .Include(r => r.Session.Group)
                 .ToList();
             return records;

@@ -24,11 +24,16 @@ function stopRequestRecordsWithError(errors: any[]) {
     };
 }
 
-function receiveRecordsData(records: Record[]) {
-    
+function receiveRecordsData(records: any[]) {
+    let data = records.map(record => (
+        {
+            ...record,
+            startTime: new Date(record.startTime)
+        }
+    ));
     return {
         type: ACTIONS.RECEIVE_RECORDS_DATA,
-        records: records
+        records: data
     };
 }
 
@@ -37,7 +42,7 @@ const requestRecords = (recordSearch: RecordSearch): AppThunkAction => async (di
 
     const apiResponse: ApiResponse = await getRecords(recordSearch);
     if (apiResponse.success) {
-        console.log(apiResponse.data);
+        console.log(apiResponse.data)
         dispatch(receiveRecordsData(apiResponse.data));
     } else {
         dispatch(stopRequestRecordsWithError(apiResponse.errors));

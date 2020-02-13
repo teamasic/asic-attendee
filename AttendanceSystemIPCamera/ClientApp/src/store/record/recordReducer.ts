@@ -16,7 +16,8 @@ const unloadedState: RecordState = {
         id: 0,
         duration: 0,
         groupCode: "",
-        startTime: new Date()
+        startTime: new Date(),
+        present: false
     }]
 };
 
@@ -40,7 +41,6 @@ const reducers: Reducer<RecordState> = (state: RecordState | undefined, incoming
                 successfullyLoaded: false
             };
         case ACTIONS.RECEIVE_RECORDS_DATA:
-            console.log("reducer: " +action.records)
             return {
                 ...state,
                 isLoading: false,

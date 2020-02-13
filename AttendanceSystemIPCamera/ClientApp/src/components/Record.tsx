@@ -5,7 +5,7 @@ import { bindActionCreators } from 'redux';
 import { ApplicationState } from '../store';
 import { recordActionCreators } from '../store/record/recordActionCreators';
 import { RecordState } from '../store/record/recordState';
-import { Calendar, momentLocalizer, View } from 'react-big-calendar'
+import { Calendar, momentLocalizer, View, NavigateAction, Event } from 'react-big-calendar'
 import moment from 'moment';
 import { constants } from '../constant';
 import Attendee from '../models/Attendee';
@@ -24,13 +24,15 @@ interface RecordComponentState {
     attendeeId: number;
     endRange: Date;
     startRange: Date;
-
+    showDate: Date
 }
 
 const localizer = momentLocalizer(moment);
-const today = new Date(2020, 0, 19);
 
 class Record extends React.PureComponent<RecordProps, RecordComponentState> {
+
+    allowComponentDidUpdateRun = false
+    today = new Date(2020, 0, 19);
 
     constructor(props: RecordProps) {
         super(props);
@@ -39,9 +41,11 @@ class Record extends React.PureComponent<RecordProps, RecordComponentState> {
 
         this.state = {
             attendeeId: attendee.id,
-            startRange: moment(today).startOf('week').toDate(),
-            endRange: moment(today).endOf('week').toDate()
+            startRange: moment(this.today).startOf('week').toDate(),
+            endRange: moment(this.today).endOf('week').toDate(),
+            showDate: this.today
         };
+        console.log(this.props);
     }
 
     componentDidMount() {
@@ -49,7 +53,10 @@ class Record extends React.PureComponent<RecordProps, RecordComponentState> {
     }
 
     componentDidUpdate() {
-        this.ensureDataFetched();
+        if (this.allowComponentDidUpdateRun) {
+            this.ensureDataFetched();
+        }
+        this.allowComponentDidUpdateRun = false;
     }
 
     public render() {
@@ -63,27 +70,42 @@ class Record extends React.PureComponent<RecordProps, RecordComponentState> {
                     localizer={localizer}
                     onNavigate={this.onNavigate}
                     defaultView='week'
-                    date={today}
+                    date={this.state.showDate}
+                    eventPropGetter = {this.eventStyleGetter}
                 />
         );
     }
 
+    eventStyleGetter = (event: Event) => {
+        console.log(event);
+        var backgroundColor = "green";
+        if (event.resource.present) {
+            backgroundColor = "red"
+        }
+        var style = {
+            backgroundColor: backgroundColor,
+        };
+        return {
+            style: style
+        };
+    }
+
+
     onNavigate = (date: Date, view: View) => {
+        this.allowComponentDidUpdateRun = true;
+        console.log(date);
         switch (view) {
             case 'week':
                 const start = moment(date).startOf('week').toDate();
                 const end = moment(date).endOf('week').toDate();
                 console.log(start)
                 console.log(end)
-                this.setState({ startRange: start, endRange: end });
+                this.setState({ startRange: start, endRange: end, showDate: date });
                 break;
         }
     }
 
     private mapDataToRecordViewModel() {
-        console.log(this.props)
-        console.log(this.props.recordData)
-        console.log(this.props.recordSearch)
         if (this.props.recordData) {
             let data = this.props.recordData.map(rd => ({
                 id: rd.id,
@@ -91,6 +113,9 @@ class Record extends React.PureComponent<RecordProps, RecordComponentState> {
                 start: rd.startTime,
                 end: moment(rd.startTime).add(rd.duration, 'm').toDate(),
                 allDay: false,
+                resource: {
+                    present: rd.present
+                }
             }));
             return data;
         } else {
@@ -109,13 +134,8 @@ class Record extends React.PureComponent<RecordProps, RecordComponentState> {
 
 }
 
-const mapStateToProps = (state: ApplicationState) => {
-    console.log(state);
-    return { state: state.record };
-}
-
 const mapDispatchToProps = (dispatch: any) => {
     return bindActionCreators(recordActionCreators, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Record);
+export default connect((state: ApplicationState) => state.record, mapDispatchToProps)(Record);
