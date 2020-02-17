@@ -8,6 +8,6 @@ namespace AttendanceSystemIPCamera.Framework.ViewModels
     public class NetworkMessageViewModel
     {
         public string IPAddress { get; set; }
-        public string Message { get; set; }
+        public object Message { get; set; }
     }
 }

@@ -63,7 +63,7 @@ namespace AttendanceSystemIPCamera.Services.GroupService
                 var networkMessage = new NetworkMessageViewModel()
                 {
                     IPAddress = localIp.ToString(),
-                    Message = loginViewModel.AttendeeCode
+                    Message = loginViewModel
                 };
                 var attendee = await unitOfWork.AttendeeNetworkService.Start(networkMessage);
                 if(attendee != null) return attendee;

@@ -59,3 +59,9 @@ export const attendanceData = [
         end: new Date(2015, 3, 30),
     }
 ]
+
+export const loginMethod = {
+    LOGIN_BY_USERNAME_PASSWORD: "1",
+    LOGIN_BY_FACE: "2",
+    lOGIN_BY_ATTENDEE_CODE: "3"
+}
