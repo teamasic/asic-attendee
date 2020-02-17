@@ -1,21 +1,37 @@
-﻿using AttendanceSystemIPCamera.Utils;
+﻿using AttendanceSystemIPCamera.Framework.ViewModels;
+using AttendanceSystemIPCamera.Repositories;
+using AttendanceSystemIPCamera.Repositories.UnitOfWork;
+using AttendanceSystemIPCamera.Services.SessionService;
+using AttendanceSystemIPCamera.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AttendanceSystemIPCamera.Services.NetworkService
 {
-    public class AttendeeNetworkService
+    public interface IAttendeeNetworkService
+    {
+        Task<AttendeeViewModel> Start(NetworkMessageViewModel message);
+    }
+
+    public class AttendeeNetworkService : IAttendeeNetworkService
     {
         protected UdpClient localServer;
         protected IPEndPoint remoteHostEP;
 
+        private MyUnitOfWork unitOfWork;
+        private ISessionService sessionService;
+        private IAttendeeRepository attendeeRepository;
 
-        public AttendeeNetworkService()
+        public AttendeeNetworkService(MyUnitOfWork unitOfWork)
         {
-
+            this.unitOfWork = unitOfWork;
+            this.sessionService = unitOfWork.SessionService;
+            this.attendeeRepository = unitOfWork.AttendeeRepository;
         }
 
         public AttendeeNetworkService(UdpClient localServer, IPEndPoint remoteHostEP)
@@ -24,26 +40,31 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             this.remoteHostEP = remoteHostEP;
         }
 
-        public void Start()
+        public async Task<AttendeeViewModel> Start(NetworkMessageViewModel message)
         {
-            if (localServer == null)    localServer = new UdpClient();
+            if (localServer == null) localServer = new UdpClient();
 
-            IPAddress localIp = null;
-            IPAddress.TryParse(NetworkUtils.GetLocalIPAddress(), out localIp);
+            string reqMess = JsonConvert.SerializeObject(message);
+            var remoteHostEP = new IPEndPoint(IPAddress.Broadcast, NetworkUtils.RunningPort);
+            if (this.remoteHostEP != null) remoteHostEP = this.remoteHostEP;
 
-            if (localIp != null)
+            Communicator communicator = new Communicator(localServer, ref remoteHostEP);
+            communicator.Send(Encoding.UTF8.GetBytes(reqMess));
+
+            object responseData = communicator.Receive();
+            var attendanceInfo = JsonConvert.DeserializeObject<AttendanceViewModel>(responseData.ToString());
+            if(attendanceInfo.Success)
             {
-                string reqMess = "'" + localIp.ToString() + "-SE63159'";
-                var remoteHostEP = new IPEndPoint(IPAddress.Broadcast, NetworkUtils.RunningPort);
-                if (this.remoteHostEP != null) remoteHostEP = this.remoteHostEP;
-
-                Communicator communicator = new Communicator(localServer, ref remoteHostEP);
-                communicator.Send(Encoding.ASCII.GetBytes(reqMess));
-
-                object responseData =  communicator.Receive();
-                Console.WriteLine("client: " + responseData);
-
+                await sessionService.SaveAttendanceInfo(attendanceInfo);
+                var attendee = attendeeRepository.GetByCode(attendanceInfo.AttendeeCode);
+                return new AttendeeViewModel()
+                {
+                    Id = attendee.Id,
+                    Code = attendee.Code,
+                    Name = attendee.Name
+                };
             }
+            return null;
         }
     }
 }

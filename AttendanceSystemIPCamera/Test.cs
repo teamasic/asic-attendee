@@ -16,8 +16,8 @@ namespace AttendanceSystemIPCamera
             //AttendeeNetworkService a = new AttendeeNetworkService();
             //a.Start();
 
-            var service = new AttendeeNetworkService();
-            service.Start();
+            //var service = new AttendeeNetworkService();
+            //service.Start();
 
             Console.Read();
         }

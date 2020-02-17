@@ -17,8 +17,8 @@ namespace AttendanceSystemIPCamera.BackgroundServices
         {
             Thread myThread = new Thread(() =>
             {
-                var application = new AttendeeWPF.App();
-                application.Run(new AttendeeWPF.MainWindow());  // add Window if you want a window.
+                //var application = new AttendeeWPF.App();
+                //application.Run(new AttendeeWPF.MainWindow());  // add Window if you want a window.
             });
             myThread.SetApartmentState(ApartmentState.STA);
             myThread.Start();

@@ -1,14 +1,34 @@
 import * as React from 'react';
-import { Route } from 'react-router';
+import { Route, Redirect } from 'react-router';
 import Layout from './components/Layout';
-import Home from './components/Home';
-import FetchData from './components/FetchData';
+import Login from './components/Login';
 
-import './custom.css'
+import './App.css';
+import Dashboard from './components/Dashboard';
+import Session from './components/Session';
+import { constants } from './constant';
+import Record from './components/Record';
 
-export default () => (
-    <Layout>
-        <Route exact path='/' component={FetchData} />
-        <Route path='/fetch-data/:startDateIndex?' component={FetchData} />
-    </Layout>
-);
+export default () => {
+    const authData = localStorage.getItem(constants.AUTH_IN_LOCAL_STORAGE);
+    if (authData) {
+        return (
+            <Layout>
+                <Route exact path='/'>
+                    <Redirect exact to='/record' />
+                </Route>
+                <Route exact path="/record" component={Record} />
+                <Route exact path="/dashboard" component={Dashboard} />
+            </Layout>
+        );
+    } else {
+        return (
+            <Layout>
+                <Route exact path="/" component={Login} />
+            </Layout>
+        );
+    }
+};
+
+
+

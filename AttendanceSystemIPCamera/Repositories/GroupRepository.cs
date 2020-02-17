@@ -1,39 +1,63 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
+using AttendanceSystemIPCamera.Framework.ViewModels;
 using AttendanceSystemIPCamera.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace AttendanceSystemIPCamera.Repositories
 {
-    public class GroupRepository : IRepository<Group>
+    public interface IGroupRepository : IRepository<Group>
     {
-        public Task<Group> Add(Group entity)
+        Task<Group> GetByGroupCodeAsync(string code);
+        List<Group> GetByGroupCodes(List<string> groupCodes);
+        Task<PaginatedList<Group>> GetAll(GroupSearchViewModel groupSearchViewModel);
+
+
+    }
+    public class GroupRepository : Repository<Group>, IGroupRepository
+    {
+        public GroupRepository(DbContext context) : base(context)
         {
-            throw new NotImplementedException();
+        }
+        private Func<IQueryable<Group>, IOrderedQueryable<Group>> Order(OrderBy orderBy)
+        {
+            switch (orderBy)
+            {
+                case OrderBy.Name:
+                    return groups => groups.OrderBy(g => g.Name);
+                case OrderBy.DateCreated:
+                default:
+                    return groups => groups.OrderByDescending(g => g.DateTimeCreated);
+            }
+        }
+        public async Task<PaginatedList<Group>> GetAll(GroupSearchViewModel groupSearchViewModel)
+        {
+            var orderFunction = Order(groupSearchViewModel.OrderBy);
+            var query = dbSet
+                .Include(g => g.AttendeeGroups)
+                    .ThenInclude(ag => ag.Attendee)
+                .Include(g => g.Sessions)
+                .Where(g => g.Name.ToLower().Contains(groupSearchViewModel.NameContains.ToLower()));
+            query = orderFunction(query);
+            return await PaginatedList<Group>.CreateAsync(query, groupSearchViewModel.Page, groupSearchViewModel.PageSize);
         }
 
-        public Task<Group> Delete(int id)
+        public async Task<Group> GetByGroupCodeAsync(string code)
         {
-            throw new NotImplementedException();
+            return await dbSet.FirstOrDefaultAsync(g => g.Code.Equals(code));
         }
 
-        public Task<Group> Get(int id)
+        public List<Group> GetByGroupCodes(List<string> groupCodes)
         {
-            throw new NotImplementedException();
+            return dbSet.Where(g => groupCodes.Contains(g.Code)).ToList();
         }
 
-        public Task<List<Group>> GetAll()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Group> Update(Group entity)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

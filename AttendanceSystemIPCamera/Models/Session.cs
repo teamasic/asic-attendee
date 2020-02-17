@@ -14,6 +14,8 @@ namespace AttendanceSystemIPCamera.Models
         public int Id { get; set; }
         public DateTime StartTime { get; set; }
         public int Duration { get; set; }
+        public int GroupId { get; set; }
         public Group Group { get; set; }
+        public virtual ICollection<Record> Records { get; set; } = new List<Record>();
     }
 }

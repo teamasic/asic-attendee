@@ -12,12 +12,15 @@ namespace AttendanceSystemIPCamera.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        public string Code { get; set; }
         public String Name { get; set; }
         public DateTime DateTimeCreated { get; set; }
+        public bool Deleted { get; set; }
+
         public virtual ICollection<AttendeeGroup> AttendeeGroups { get; set; } = new List<AttendeeGroup>();
         [NotMapped]
         public ICollection<Attendee> Attendees => AttendeeGroups.Select(ag => ag.Attendee).ToList();
         public virtual ICollection<Session> Sessions { get; set; } = new List<Session>();
-        public bool Deleted { get; set; }
+        
     }
 }
