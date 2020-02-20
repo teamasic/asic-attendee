@@ -44,18 +44,19 @@ namespace AttendanceSystemIPCamera.Services.SessionService
             var tran = unitOfWork.CreateTransaction();
             try
             {
-                var addAttendeeTask = attendeeService.AddAttendeeIfNotInDb(attendanceInfo.AttendeeCode, attendanceInfo.AttendeeName);
+                //--
+                var attendee = await attendeeService.AddAttendeeIfNotInDb(attendanceInfo.AttendeeCode, attendanceInfo.AttendeeName);
 
                 var groupsWithSessions = attendanceInfo.Groups;
                 var groups = groupsWithSessions.Select(a => new GroupViewModel()
                 {
                     Code = a.GroupCode,
-                    Name = a.Name
+                    Name = a.Name,
                 }).Distinct().ToList();
-                Task addGroupTask = groupService.AddGroupIfNotInDb(groups);
+                await groupService.AddGroupIfNotInDb(groups);
+                //--
+                //add attendee groups
 
-                var attendee = await addAttendeeTask;
-                await addGroupTask;
                 foreach (var group in groupsWithSessions)
                 {
                     var currentGroup = await groupRepository.GetByGroupCodeAsync(group.GroupCode);
@@ -67,11 +68,14 @@ namespace AttendanceSystemIPCamera.Services.SessionService
                             var session = s.ToEntity();
                             session.Id = 0;
                             session.GroupId = currentGroup.Id;
-                            session.Records.Add(new Record()
+                            if (s.Record != null)
                             {
-                                AttendeeId = attendee.Id,
-                                Present = s.Record.Present
-                            });
+                                session.Records.Add(new Record()
+                                {
+                                    AttendeeId = attendee.Id,
+                                    Present = s.Record.Present
+                                });
+                            }
                             return session;
                         }).ToList();
                         await sessionRepository.Add(sessions);

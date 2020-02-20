@@ -32,7 +32,9 @@ const localizer = momentLocalizer(moment);
 class Record extends React.PureComponent<RecordProps, RecordComponentState> {
 
     allowComponentDidUpdateRun = false
-    today = new Date(2020, 0, 19);
+    today = new Date();
+    min = new Date(0, 0, 0, 7, 0, 0);
+    max = new Date(0, 0, 0, 21, 0, 0);
 
     constructor(props: RecordProps) {
         super(props);
@@ -65,13 +67,16 @@ class Record extends React.PureComponent<RecordProps, RecordComponentState> {
                 <Calendar
                     events={this.mapDataToRecordViewModel()}
                     views={['week']}
-                    step={60}
+                    // step={60}
                     showMultiDayTimes
                     localizer={localizer}
                     onNavigate={this.onNavigate}
                     defaultView='week'
                     date={this.state.showDate}
-                    eventPropGetter = {this.eventStyleGetter}
+                    eventPropGetter={this.eventStyleGetter}
+                    min={this.min}
+                    max={this.max}
+                    // timeslots={1}
                 />
         );
     }
