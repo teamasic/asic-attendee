@@ -1,8 +1,9 @@
 ﻿export default interface Record {
     id: number;
+    name: string;
     groupCode: string;
     startTime: Date;
-    duration: number;
+    endTime: Date;
     present: boolean
 }
 

@@ -18,6 +18,7 @@ namespace AttendanceSystemIPCamera.Repositories
         Task<Group> GetByGroupCodeAsync(string code);
         List<Group> GetByGroupCodes(List<string> groupCodes);
         Task<PaginatedList<Group>> GetAll(GroupSearchViewModel groupSearchViewModel);
+        List<string> GetGroupCodesContainsInList(List<string> groupCodes);
 
 
     }
@@ -59,5 +60,11 @@ namespace AttendanceSystemIPCamera.Repositories
             return dbSet.Where(g => groupCodes.Contains(g.Code)).ToList();
         }
 
+        public List<string> GetGroupCodesContainsInList(List<string> groupCodes)
+        {
+            return this.dbSet.Where(g => groupCodes.Contains(g.Code))
+                            .Select(g => g.Code)
+                            .ToList();
+        }
     }
 }

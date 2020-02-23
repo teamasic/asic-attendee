@@ -23,11 +23,20 @@ namespace AttendanceSystemIPCamera.Controllers
         }
 
         [HttpGet]
-        public dynamic GetRecords([FromQuery] RecordSearchViewModel search)
+        public dynamic GetRecords([FromQuery] SessionSearchViewModel search)
         {
             return ExecuteInMonitoring(() =>
             {
                 return service.GetRecord(search);
+            });
+        }
+
+        [HttpGet("refresh")]
+        public async Task<dynamic> Refresh([FromQuery] SessionSearchViewModel searchViewModel)
+        {
+            return await ExecuteInMonitoring( async () =>
+            {
+                return await service.Refresh(searchViewModel);
             });
         }
 

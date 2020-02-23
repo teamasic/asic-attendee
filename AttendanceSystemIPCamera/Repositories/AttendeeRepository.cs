@@ -15,7 +15,8 @@ namespace AttendanceSystemIPCamera.Repositories
 {
     public interface IAttendeeRepository : IRepository<Attendee>
     {
-        Attendee GetByCode(string code);
+        Attendee GetByCodeWithAttendeeGroups(string code);
+        Attendee GetByIdWithAttendeeGroups(int Id);
     }
     public class AttendeeRepository : Repository<Attendee>, IAttendeeRepository
     {
@@ -23,11 +24,16 @@ namespace AttendanceSystemIPCamera.Repositories
         {
         }
 
-        public Attendee GetByCode(string code)
+        public Attendee GetByCodeWithAttendeeGroups(string code)
         {
-            return dbSet.Where(a => code.Equals(a.Code)).FirstOrDefault();
+            return dbSet.Where(a => code.Equals(a.Code))
+                .Include(a => a.AttendeeGroups).FirstOrDefault();
         }
-
+        public Attendee GetByIdWithAttendeeGroups(int Id)
+        {
+            return dbSet.Where(a => a.Id == Id)
+                .Include(a => a.AttendeeGroups).FirstOrDefault();
+        }
 
     }
 }

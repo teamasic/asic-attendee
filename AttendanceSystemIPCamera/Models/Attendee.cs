@@ -15,7 +15,17 @@ namespace AttendanceSystemIPCamera.Models
         public string Name { get; set; }
         public virtual ICollection<AttendeeGroup> AttendeeGroups { get; set; } = new List<AttendeeGroup>();
         [NotMapped]
-        public ICollection<Group> Groups => AttendeeGroups.Select(ag => ag.Group).ToList();
+        public virtual ICollection<Group> Groups => AttendeeGroups.Select(ag => ag.Group).ToList();
         public virtual ICollection<Record> Records { get; set; } = new List<Record>();
+
+        public override bool Equals(object obj)
+        {
+            return obj is Attendee attendee &&
+                   Id == attendee.Id;
+        }
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id);
+        }
     }
 }

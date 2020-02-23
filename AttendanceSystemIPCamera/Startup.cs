@@ -1,11 +1,14 @@
 using AttendanceSystemIPCamera.BackgroundServices;
 using AttendanceSystemIPCamera.Framework.AutoMapperProfiles;
 using AttendanceSystemIPCamera.Framework.Database;
+using AttendanceSystemIPCamera.Framework.GlobalStates;
 using AttendanceSystemIPCamera.Framework.ViewModels;
 using AttendanceSystemIPCamera.Models;
 using AttendanceSystemIPCamera.Repositories.UnitOfWork;
 using AttendanceSystemIPCamera.Services.GroupService;
 using AttendanceSystemIPCamera.Services.RecordService;
+using AttendanceSystemIPCamera.Services.SessionService;
+using AttendanceSystemIPCamera.Services.UnitService;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -16,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System.Collections.Generic;
 
@@ -23,6 +27,10 @@ namespace AttendanceSystemIPCamera
 {
     public class Startup
     {
+
+        public static readonly ILoggerFactory DefaultLoggerFactory
+                                    = LoggerFactory.Create(builder => { builder.AddConsole(); });
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -33,7 +41,7 @@ namespace AttendanceSystemIPCamera
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllersWithViews().AddNewtonsoftJson();
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -46,6 +54,8 @@ namespace AttendanceSystemIPCamera
             SetupDependencyInjection(services);
             SetupBackgroundService(services);
             setupSwagger(services);
+            SetupUnitConfig(services);
+            SetupGlobalStateManager(services);
 
         }
 
@@ -107,7 +117,12 @@ namespace AttendanceSystemIPCamera
 
         private void SetupDatabaseContext(IServiceCollection services)
         {
-            services.AddDbContext<MainDbContext>(options => options.UseSqlite(Configuration.GetConnectionString("SqliteDB")));
+            services.AddDbContext<MainDbContext>(options =>
+            {
+                options.UseSqlite(Configuration.GetConnectionString("SqliteDB"));
+                options.UseLoggerFactory(DefaultLoggerFactory);
+            });
+
         }
         private void SetupAutoMapper(IServiceCollection services)
         {
@@ -128,6 +143,7 @@ namespace AttendanceSystemIPCamera
             services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IAttendeeService, AttendeeService>();
             services.AddScoped<IRecordService, RecordService>();
+            services.AddScoped<ISessionService, SessionService>();
             services.AddScoped<MyUnitOfWork>();
             services.AddScoped<GroupValidation>();
         }
@@ -135,6 +151,18 @@ namespace AttendanceSystemIPCamera
         private void SetupBackgroundService(IServiceCollection services)
         {
             services.AddSingleton<IHostedService, WindowAppRunnerService>();
+        }
+
+        private void SetupUnitConfig(IServiceCollection services)
+        {
+            UnitService unitServiceInstance = UnitServiceFactory.Create(Configuration.GetValue<string>("UnitConfigFile"));
+            services.AddSingleton(unitServiceInstance);
+        }
+
+        private void SetupGlobalStateManager(IServiceCollection services)
+        {
+            var globalState = new GlobalState();
+            services.AddSingleton(globalState);
         }
     }
 }

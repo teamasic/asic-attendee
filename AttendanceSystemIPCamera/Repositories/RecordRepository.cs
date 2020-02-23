@@ -10,7 +10,7 @@ namespace AttendanceSystemIPCamera.Repositories
 {
     public interface IRecordRepository : IRepository<Record>
     {
-        List<Record> GetByRecordSearch(RecordSearchViewModel search);
+        List<Record> GetByRecordSearch(SessionSearchViewModel search);
 
     }
     public class RecordRepository : Repository<Record>, IRecordRepository
@@ -19,7 +19,7 @@ namespace AttendanceSystemIPCamera.Repositories
         {
         }
 
-        public List<Record> GetByRecordSearch(RecordSearchViewModel search)
+        public List<Record> GetByRecordSearch(SessionSearchViewModel search)
         {
             var records = dbSet.Where(r => r.AttendeeId == search.AttendeeId)
                 .Where(r => r.Session.StartTime > search.StartTime)

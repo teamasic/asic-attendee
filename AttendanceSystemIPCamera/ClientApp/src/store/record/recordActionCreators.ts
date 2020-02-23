@@ -2,7 +2,7 @@ import ApiResponse from "../../models/ApiResponse";
 import { AppThunkAction } from "..";
 import RecordSearch from "../../models/RecordSearch";
 import Record, { RecordViewModel } from "../../models/Record";
-import { getRecords } from "../../services/record";
+import { getRecords, refreshRecords } from "../../services/record";
 
 export const ACTIONS = {
     START_REQUEST_RECORDS: 'START_REQUEST_RECORDS',
@@ -49,6 +49,19 @@ const requestRecords = (recordSearch: RecordSearch): AppThunkAction => async (di
     }
 }
 
+const requestRefresh = (recordSearch: RecordSearch): AppThunkAction => async (dispatch, getState) => {
+    dispatch(startRequestRecords(recordSearch));
+
+    const apiResponse: ApiResponse = await refreshRecords(recordSearch);
+    if (apiResponse.success) {
+        console.log(apiResponse.data)
+        dispatch(receiveRecordsData(apiResponse.data));
+    } else {
+        dispatch(stopRequestRecordsWithError(apiResponse.errors));
+    }
+}
+
 export const recordActionCreators = {
-    requestRecords: requestRecords
+    requestRecords: requestRecords,
+    requestRefresh: requestRefresh
 };

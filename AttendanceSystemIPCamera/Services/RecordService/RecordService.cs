@@ -15,7 +15,8 @@ namespace AttendanceSystemIPCamera.Services.RecordService
 {
     public interface IRecordService : IBaseService<Record>
     {
-        List<RecordAttendanceViewModel> GetRecord(RecordSearchViewModel searchViewModel);
+        List<RecordAttendanceViewModel> GetRecord(SessionSearchViewModel searchViewModel);
+        Task<List<RecordAttendanceViewModel>> Refresh(SessionSearchViewModel searchViewModel);
     }
     public class RecordService : BaseService<Record>, IRecordService
     {
@@ -23,29 +24,44 @@ namespace AttendanceSystemIPCamera.Services.RecordService
 
         private IAttendeeService attendeeService;
 
+
         public RecordService(MyUnitOfWork unitOfWork) : base(unitOfWork)
         {
             this.recordRepository = unitOfWork.RecordRepository;
             this.attendeeService = unitOfWork.AttendeeService;
         }
 
-        public List<RecordAttendanceViewModel> GetRecord(RecordSearchViewModel searchViewModel)
+        public List<RecordAttendanceViewModel> GetRecord(SessionSearchViewModel searchViewModel)
         {
             var attendee = attendeeService.GetById(searchViewModel.AttendeeId);
-            if(attendee != null)
+            if (attendee != null)
             {
                 List<Record> records = recordRepository.GetByRecordSearch(searchViewModel);
                 var recordAttendanceViewModel = records.Select(r => new RecordAttendanceViewModel()
                 {
                     Id = r.Id,
+                    Name = r.Session.Name,
                     StartTime = r.Session.StartTime,
-                    Duration = r.Session.Duration,
+                    EndTime = r.Session.EndTime,
                     GroupCode = r.Session.Group.Code,
                     Present = r.Present
-                }).ToList();
+                })
+                .ToList();
                 return recordAttendanceViewModel;
             }
             throw new BaseException(ErrorMessage.ATTENDEE_NOT_FOUND);
+        }
+
+
+        public async Task<List<RecordAttendanceViewModel>> Refresh(SessionSearchViewModel searchViewModel)
+        {
+            var attendee = await attendeeService.GetById(searchViewModel.AttendeeId);
+            await attendeeService.Login(new LoginViewModel()
+            {
+                AttendeeCode = attendee.Code,
+                LoginMethod = Constant.GET_DATA_BY_ATTENDEE_CODE
+            });
+            return GetRecord(searchViewModel);
         }
 
     }

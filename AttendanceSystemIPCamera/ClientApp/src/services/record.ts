@@ -12,3 +12,11 @@ export const getRecords = async (recordSearch: RecordSearch): Promise<ApiRespons
     });
     return await response.data;
 };
+
+export const refreshRecords = async (recordSearch: RecordSearch): Promise<ApiResponse> => {
+    const response = await axios.get(apify("refresh"), {
+        params: recordSearch
+    });
+    return await response.data;
+};
+
