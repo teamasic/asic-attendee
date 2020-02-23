@@ -43,7 +43,11 @@ class PageLayout extends React.Component<
 						</Menu.Item>
 						<Menu.Item key="2">
 							<Icon type="sync" />
-							<span>Sync</span>
+							<span>Refresh</span>
+						</Menu.Item>
+						<Menu.Item key="3" onClick={this.logout}>
+							<Icon type="logout" />
+							<span>Logout</span>
 						</Menu.Item>
 					</Menu>
 				</Sider>
@@ -66,6 +70,14 @@ class PageLayout extends React.Component<
 				</Row>
 			</Layout>
 		);
+	}
+
+	private logout(){
+		const authData = localStorage.getItem(constants.AUTH_IN_LOCAL_STORAGE);
+		if(authData != null){
+			localStorage.removeItem(constants.AUTH_IN_LOCAL_STORAGE);
+			window.location.href = "/";
+		}
 	}
 }
 

@@ -7,9 +7,14 @@ namespace AttendanceSystemIPCamera.Framework
 {
     class AutoMapperConfiguration
     {
+        private static IMapper mapper = null;
         public static IMapper GetInstance()
         {
-            return Mapper.Configuration.CreateMapper();
+            if (mapper == null)
+            {
+                mapper = Mapper.Configuration.CreateMapper();
+            }
+            return mapper;
         }
     }
 }

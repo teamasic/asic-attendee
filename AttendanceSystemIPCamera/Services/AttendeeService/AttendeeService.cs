@@ -20,8 +20,9 @@ namespace AttendanceSystemIPCamera.Services.GroupService
 {
     public interface IAttendeeService : IBaseService<Attendee>
     {
-        Task<AttendeeViewModel> AddAttendeeIfNotInDb(string attendeeCode, string name);
+        Task<AttendeeViewModel> AddAttendeeWithGroupsIfNotInDb(string attendeeCode, string name, List<int> groupIds);
         Task<AttendeeViewModel> Login(LoginViewModel loginViewModel);
+        Attendee GetByIdWithAttendeeGroups(int attendeeId);
     }
 
     public class AttendeeService : BaseService<Attendee>, IAttendeeService
@@ -33,9 +34,10 @@ namespace AttendanceSystemIPCamera.Services.GroupService
             this.attendeeRepository = unitOfWork.AttendeeRepository;
         }
 
-        public async Task<AttendeeViewModel> AddAttendeeIfNotInDb(string attendeeCode, string name)
+        public async Task<AttendeeViewModel> AddAttendeeWithGroupsIfNotInDb(string attendeeCode, string name,
+                                                                                List<int> groupIds)
         {
-            var attendee = attendeeRepository.GetByCode(attendeeCode);
+            var attendee = attendeeRepository.GetByCodeWithAttendeeGroups(attendeeCode);
             if (attendee == null)
             {
                 attendee = new Attendee()
@@ -44,8 +46,22 @@ namespace AttendanceSystemIPCamera.Services.GroupService
                     Name = name,
                 };
                 await this.Add(attendee);
-                unitOfWork.Commit();
             }
+
+            var attendedGroupIds = attendee.AttendeeGroups.Select(ag => ag.GroupId).ToList();
+            groupIds.ForEach(gId =>
+            {
+                if (!attendedGroupIds.Contains(gId))
+                {
+                    var attGr = new AttendeeGroup()
+                    {
+                        AttendeeId = attendee.Id,
+                        GroupId = gId
+                    };
+                    attendee.AttendeeGroups.Add(attGr);
+                }
+            });
+            unitOfWork.Commit();
             return new AttendeeViewModel()
             {
                 Id = attendee.Id,
@@ -66,10 +82,15 @@ namespace AttendanceSystemIPCamera.Services.GroupService
                     Message = loginViewModel
                 };
                 var attendee = await unitOfWork.AttendeeNetworkService.Start(networkMessage);
-                if(attendee != null) return attendee;
+                if (attendee != null) return attendee;
                 throw new BaseException(ErrorMessage.LOGIN_FAIL);
             }
             else throw new BaseException(ErrorMessage.CANNOT_GET_LOCAL_IP_ADDRESS);
+        }
+
+        public Attendee GetByIdWithAttendeeGroups(int attendeeId)
+        {
+            return attendeeRepository.GetByIdWithAttendeeGroups(attendeeId);
         }
     }
 }

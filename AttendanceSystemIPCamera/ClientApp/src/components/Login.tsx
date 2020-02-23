@@ -6,10 +6,9 @@ import { attendeeActionCreators } from '../store/attendee/attendeeActionCreators
 import { ApplicationState } from '../store';
 import { AttendeeState } from '../store/attendee/attendeeState';
 
-import { Form, Icon, Input, Button, Checkbox, Spin, Tabs } from 'antd';
+import { Form, Icon, Input, Button, Checkbox, Spin, Tabs, Row, Col } from 'antd';
 import Webcam from 'react-webcam';
 import AttendeeLogin from '../models/AttendeeLogin';
-import { UncontrolledDropdown } from 'reactstrap';
 import { loginMethod } from '../constant';
 import { login } from '../services/attendee';
 
@@ -97,50 +96,55 @@ class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
         let { attendeeCode } = this.state;
         return (
             <div className="container">
-                <div className="content">
-                    <Tabs defaultActiveKey={this.state.loginMethod} onChange={this.handleChangeTab}>
-                        <TabPane tab="Login by username and password" key={loginMethod.lOGIN_BY_ATTENDEE_CODE}>
-                            <Form onSubmit={(e) => this.handleSubmit(e)} className="login-form">
-                                <Form.Item>
-                                    <Input
-                                        prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                                        placeholder="Attendee Code"
-                                        onChange={(e) => this.setState({ attendeeCode: e.target.value })}
-                                        defaultValue={attendeeCode}
-                                    />
-                                </Form.Item>
-                                <Form.Item>
-                                    <Button type="primary" htmlType="submit" className="login-form-button">Log in</Button>
-                                </Form.Item>
-                            </Form>
+                
+                <Row align="middle">
+                    <div className="content">
+                        <Col>
+                            <Tabs defaultActiveKey={this.state.loginMethod} onChange={this.handleChangeTab}>
+                                <TabPane tab="Login by username and password" key={loginMethod.lOGIN_BY_ATTENDEE_CODE}>
+                                    <Form onSubmit={(e) => this.handleSubmit(e)} className="login-form" layout="horizontal">
+                                        <Form.Item label="Attendee Code">
+                                            <Input
+                                                prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                                                onChange={(e) => this.setState({ attendeeCode: e.target.value })}
+                                                defaultValue={attendeeCode}
+                                            />
+                                        </Form.Item>
+                                        <Form.Item>
+                                            <Button type="primary" htmlType="submit" className="login-form-button">Log in</Button>
+                                        </Form.Item>
+                                    </Form>
 
-                        </TabPane>
+                                </TabPane>
 
-                        <TabPane tab="Login by face" key={loginMethod.LOGIN_BY_FACE}>
+                                <TabPane tab="Login by face" key={loginMethod.LOGIN_BY_FACE}>
 
-                            <Form onSubmit={(e) => this.handleSubmit(e)} className="login-form">
-                                {this.state.webcamEnabled ? <React.Fragment>
-                                    <Webcam
-                                        audio={false}
-                                        height={350}
-                                        ref="webcam"
-                                        screenshotFormat="image/jpeg"
-                                        width={350}
-                                        videoConstraints={this.videoConstraints}
-                                    />
-                                </React.Fragment>
-                                    : ""}
-                                <Form.Item>
-                                    <Button type="primary" htmlType="submit" className="login-form-button">Log in</Button>
-                                </Form.Item>
-                            </Form>
-                        </TabPane>
+                                    <Form onSubmit={(e) => this.handleSubmit(e)} className="login-form">
+                                        {this.state.webcamEnabled ? <React.Fragment>
+                                            <Webcam
+                                                audio={false}
+                                                height={350}
+                                                ref="webcam"
+                                                screenshotFormat="image/jpeg"
+                                                width={350}
+                                                videoConstraints={this.videoConstraints}
+                                            />
+                                        </React.Fragment>
+                                            : ""}
+                                        <Form.Item>
+                                            <Button type="primary" htmlType="submit" className="login-form-button">Log in</Button>
+                                        </Form.Item>
+                                    </Form>
+                                </TabPane>
 
-                    </Tabs>
-                    {
-                        (this.props.isLoading) ? <Spin /> : ""
-                    }
-                </div>
+                            </Tabs>
+                            {
+                                (this.props.isLoading) ? <Spin /> : ""
+                            }
+                        </Col>
+                        </div>
+                    </Row>
+                
             </div>
         );
     }

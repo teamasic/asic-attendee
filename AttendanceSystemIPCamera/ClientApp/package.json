@@ -16,6 +16,7 @@
         "history": "4.10.1",
         "jquery": "^3.4.1",
         "merge": "1.2.1",
+        "moment-range": "^4.0.2",
         "popper.js": "^1.16.0",
         "react": "16.11.0",
         "react-big-calendar": "^0.23.0",
@@ -65,5 +66,5 @@
         "not ie <= 11",
         "not op_mini all"
     ],
-    "proxy": "https://localhost:44369/"
+    "proxy": "https://localhost:50020/"
 }

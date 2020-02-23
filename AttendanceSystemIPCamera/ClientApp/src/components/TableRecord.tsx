@@ -12,7 +12,7 @@ import { extendMoment } from 'moment-range';
 import { constants } from '../constant';
 import Attendee from '../models/Attendee';
 import RecordSearch from '../models/RecordSearch';
-import { Spin, Button } from 'antd';
+import { Spin } from 'antd';
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -39,8 +39,7 @@ const moment = extendMoment(Moment);
 class Record extends React.PureComponent<RecordProps, RecordComponentState> {
 
     allowComponentDidUpdateRun = false
-
-    today = new Date();
+    today = new Date(2020, 1, 20);
 
     constructor(props: RecordProps) {
         super(props);
@@ -71,13 +70,9 @@ class Record extends React.PureComponent<RecordProps, RecordComponentState> {
         return (
             (this.props.isLoading) ? <Spin /> :
                 <>
-                    <Button.Group>
-                        <Button type="primary" onClick={(e) => this.handleRefresh()}>Refresh</Button>
-                    </Button.Group>
                     <AttendanceButtonGroup onNavigate={this.onNavigate} today={this.state.showDate} />
                     <AttendanceTable units={this.mapToUnits()} columns={this.mapToColumns()} events={this.mapToEvents()} />
                 </>
-
         );
     }
 
@@ -121,22 +116,14 @@ class Record extends React.PureComponent<RecordProps, RecordComponentState> {
         });
     }
 
-    private handleRefresh() {
-        var recordSearch: RecordSearch = this.getRecordSearch();
-        this.props.requestRefresh(recordSearch);
-    }
 
     private ensureDataFetched() {
-        var recordSearch: RecordSearch = this.getRecordSearch();
-        this.props.requestRecords(recordSearch);
-    }
-
-    private getRecordSearch() {
-        return {
+        var recordSearch: RecordSearch = {
             attendeeId: this.state.attendeeId,
             startTime: this.state.startDate,
             endTime: this.state.endDate
-        };
+        }
+        this.props.requestRecords(recordSearch);
     }
 
 }
