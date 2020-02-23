@@ -52,6 +52,7 @@ namespace AttendanceSystemIPCamera.Services.SessionService
             var groupIds = sessionVms.Select(s => s.GroupId).Distinct().ToList();
             foreach (var gId in groupIds)
             {
+
                 var sessionInGroupVms = sessionVms.Where(svm => svm.GroupId == gId);
                 //find session not exist
                 var startTimes = sessionInGroupVms.Select(ss => ss.StartTime).Distinct().ToList();
@@ -59,6 +60,7 @@ namespace AttendanceSystemIPCamera.Services.SessionService
                 var startTimesInDb = sessionInDb.Select(s => s.StartTime).ToList();
                 var startTimesNotInDb = startTimes.Where(st => !startTimesInDb.Contains(st)).ToList();
                 var sessionVmsNotInDb = sessionInGroupVms.Where(s => startTimesNotInDb.Contains(s.StartTime)).ToList();
+
 
                 //save sessions not exist, sessions contain records
                 if (sessionVmsNotInDb != null && sessionVmsNotInDb.Count > 0)
@@ -69,6 +71,7 @@ namespace AttendanceSystemIPCamera.Services.SessionService
 
                 //update record that its session exist
                 sessionInDb.ForEach(session =>
+
                 {
                     var s = sessionInGroupVms.FirstOrDefault(s => s.GroupId == session.GroupId
                                         && s.StartTime == session.StartTime);
@@ -84,6 +87,7 @@ namespace AttendanceSystemIPCamera.Services.SessionService
                             AttendeeId = attendeeId,
                             Present = s.Records?.LastOrDefault()?.Present ?? false
                         });
+
                     }
                 });
                 unitOfWork.Commit();
