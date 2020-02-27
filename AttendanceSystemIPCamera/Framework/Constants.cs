@@ -24,6 +24,8 @@ namespace AttendanceSystemIPCamera.Framework
             public const string CANNOT_GET_LOCAL_IP_ADDRESS = "Cannot get local ip address.";
 
             public static string ATTENDEE_NOT_FOUND = "Attendee not found";
+
+            public static string NETWORK_ERROR = "Cannot connect to supervisor";
         }
     }
 }

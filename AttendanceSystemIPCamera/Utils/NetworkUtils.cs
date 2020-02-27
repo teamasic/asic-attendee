@@ -9,6 +9,9 @@ namespace AttendanceSystemIPCamera.Utils
     public class NetworkUtils
     {
         public static int RunningPort = 8888;
+
+        public static IPAddress SupervisorAddress = IPAddress.Broadcast;
+
         public static string GetLocalIPAddress()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());

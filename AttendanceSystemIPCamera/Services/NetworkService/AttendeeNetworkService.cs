@@ -16,6 +16,8 @@ using System.Threading.Tasks;
 using AttendanceSystemIPCamera.Framework.AutoMapperProfiles;
 using System.Linq;
 using AttendanceSystemIPCamera.Framework;
+using System.Threading;
+using static AttendanceSystemIPCamera.Framework.Constants;
 
 namespace AttendanceSystemIPCamera.Services.NetworkService
 {
@@ -28,12 +30,17 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
     {
         protected UdpClient localServer;
         protected IPEndPoint remoteHostEP;
+        protected IPAddress supervisorIPAddress
+        { get => NetworkUtils.SupervisorAddress; set => NetworkUtils.SupervisorAddress = value; }
 
         private MyUnitOfWork unitOfWork;
         private ISessionService sessionService;
         private IAttendeeService attendeeService;
         private IGroupService groupService;
         private IMapper mapper;
+
+        private const int MAX_TRY_TIMES = 2;
+        private const int TIME_OUT = 5 * 1000;
 
         public AttendeeNetworkService(MyUnitOfWork unitOfWork)
         {
@@ -44,24 +51,76 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             this.mapper = AutoMapperConfiguration.GetInstance();
         }
 
-        public AttendeeNetworkService(UdpClient localServer, IPEndPoint remoteHostEP)
-        {
-            this.localServer = localServer;
-            this.remoteHostEP = remoteHostEP;
-        }
-
+      
         public async Task<AttendeeViewModel> Start(NetworkMessageViewModel message)
         {
-            if (localServer == null) localServer = new UdpClient();
-
             string reqMess = JsonConvert.SerializeObject(message);
-            var remoteHostEP = new IPEndPoint(IPAddress.Broadcast, NetworkUtils.RunningPort);
-            if (this.remoteHostEP != null) remoteHostEP = this.remoteHostEP;
+            object responseData = await SendRequest(reqMess);
+            if(responseData == null)
+            {
+                throw new BaseException(ErrorMessage.NETWORK_ERROR);
+            }
+            return await ProcessReponseMessage(responseData);
+        }
+        private async Task<object> SendRequest(string message)
+        {
+            bool isContinue = true;
+            int i = 0;
+            object responseData = null;
+            do
+            {
+                Communicator communicator = GetCommunicator(this.supervisorIPAddress);
+                communicator.Send(Encoding.UTF8.GetBytes(message));
+                try
+                {
+                    var cts = new CancellationTokenSource();
+                    cts.CancelAfter(TIME_OUT);
 
-            Communicator communicator = new Communicator(localServer, ref remoteHostEP);
-            communicator.Send(Encoding.UTF8.GetBytes(reqMess));
+                    var receiveTask = Task.Run(() =>
+                    {
+                        object responseData = communicator.Receive();
+                        this.supervisorIPAddress = communicator.RemoteHostIPAddress; //save supervisor ip address
+                        return responseData;
+                    }, cts.Token);
 
-            object responseData = communicator.Receive();
+                    var tcs = new TaskCompletionSource<bool>();
+                    using (cts.Token.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
+                    {
+                        if (receiveTask != await Task.WhenAny(receiveTask, tcs.Task))
+                        {
+                            this.localServer.Close();
+                            throw new OperationCanceledException(cts.Token);
+                        }
+                        else
+                        {
+                            responseData = receiveTask.Result;
+                        }
+                    }
+                   
+                    isContinue = false;
+                }
+                catch (OperationCanceledException)
+                {
+                    this.supervisorIPAddress = IPAddress.Broadcast; // reset to ip broadcast
+                }
+                i++;
+            } while (isContinue && i < MAX_TRY_TIMES);
+            return responseData;
+        }
+
+        private Communicator GetCommunicator(IPAddress ipAddress)
+        {
+            if (localServer == null || localServer?.Client == null)
+                localServer = new UdpClient();
+
+            this.supervisorIPAddress = ipAddress;
+            this.remoteHostEP = new IPEndPoint(ipAddress, NetworkUtils.RunningPort);
+            return new Communicator(localServer, ref this.remoteHostEP);
+        }
+
+        private async Task<AttendeeViewModel> ProcessReponseMessage(object responseData)
+        {
+            //process response
             var attendanceInfo = JsonConvert.DeserializeObject<AttendanceNetworkViewModel>(responseData.ToString());
             if (attendanceInfo != null && attendanceInfo.Success)
             {

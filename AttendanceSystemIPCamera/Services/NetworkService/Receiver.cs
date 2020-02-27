@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AttendanceSystemIPCamera.Services.NetworkService
 {
@@ -19,6 +20,12 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
         {
             return localServer.Receive(ref remoteHostIP);
         }
+
+        protected async Task<UdpReceiveResult> ReceiveAsync()
+        {
+            return await localServer.ReceiveAsync();
+        }
+
         protected  object Decode(object encodedMessage) {
             return encodedMessage;
         }
@@ -37,6 +44,19 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             }
             return null;
         }
+
+        //public async Task<object> StartAsync()
+        //{
+        //    var udpReceiveResult = await ReceiveAsync();
+
+        //    var encodedMessage = Encoding.UTF8.GetString(Receive(ref remoteHostIP) as byte[]);
+        //    var decodedMessage = Decode(encodedMessage);
+        //    if (Authenticate(decodedMessage))
+        //    {
+        //        return decodedMessage;
+        //    }
+        //    return null;
+        //}
 
     }
 }
