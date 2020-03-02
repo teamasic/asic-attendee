@@ -2,6 +2,7 @@
     id: number;
     name: string;
     groupCode: string;
+    groupName: string;
     startTime: Date;
     endTime: Date;
     present: boolean

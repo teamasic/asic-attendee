@@ -31,7 +31,7 @@ export default class AttendanceButtonGroup extends React.Component<ButtonGroupPr
     }
 
     render() {
-        return (<ButtonGroup>
+        return (<ButtonGroup className="record-button-group">
             <Button onClick={this.handleOnClick} id='previous'>Previous</Button>
             <Button onClick={this.handleOnClick} id='next'>Next</Button>
             <Button onClick={this.handleOnClick} id='today'>Today</Button>

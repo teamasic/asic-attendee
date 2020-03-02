@@ -26,3 +26,41 @@ code {
     align-items: center;
     height: 100vh;
 }
+
+.table-cell-text {
+    color: white;
+    font-weight: bold;
+}
+
+.table-cell {
+    cursor: pointer;
+    position: relative;
+}
+
+.table-cell.is-absent {
+    background: #FF6260 !important;
+}
+
+.table-cell.is-absent .anticon {
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    color: white;
+}
+
+.table-cell.is-present {
+    background: #3BDE86 !important;
+}
+
+.record-button-group {
+    margin-bottom: 15px;
+}
+
+.change-request-modal .item {
+    margin-bottom: 10px;
+}
+
+.change-request-modal .label, .change-request-modal .ant-form-item-label {
+    display: inline-block;
+    font-weight: bold;
+}

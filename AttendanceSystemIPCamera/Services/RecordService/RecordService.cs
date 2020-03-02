@@ -44,6 +44,7 @@ namespace AttendanceSystemIPCamera.Services.RecordService
                     StartTime = r.Session.StartTime,
                     EndTime = r.Session.EndTime,
                     GroupCode = r.Session.Group.Code,
+                    GroupName = r.Session.Group.Name,
                     Present = r.Present
                 })
                 .ToList();

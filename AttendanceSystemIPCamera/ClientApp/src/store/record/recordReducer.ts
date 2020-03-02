@@ -16,6 +16,7 @@ const unloadedState: RecordState = {
         id: 0,
         name: "",
         groupCode: "",
+        groupName: "",
         startTime: new Date(),
         endTime: new Date(),
         present: false

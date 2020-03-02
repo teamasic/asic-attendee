@@ -7,6 +7,7 @@ using AttendanceSystemIPCamera.Models;
 using AttendanceSystemIPCamera.Repositories.UnitOfWork;
 using AttendanceSystemIPCamera.Services.GroupService;
 using AttendanceSystemIPCamera.Services.RecordService;
+using AttendanceSystemIPCamera.Services.RoomService;
 using AttendanceSystemIPCamera.Services.SessionService;
 using AttendanceSystemIPCamera.Services.UnitService;
 using AutoMapper;
@@ -144,6 +145,7 @@ namespace AttendanceSystemIPCamera
             services.AddScoped<IAttendeeService, AttendeeService>();
             services.AddScoped<IRecordService, RecordService>();
             services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<IChangeRequestService, ChangeRequestService>();
             services.AddScoped<MyUnitOfWork>();
             services.AddScoped<GroupValidation>();
         }

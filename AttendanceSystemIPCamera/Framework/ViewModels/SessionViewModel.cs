@@ -18,6 +18,8 @@ namespace AttendanceSystemIPCamera.Framework.ViewModels
         public string RoomName { get; set; }
         public int GroupId { get; set; }
         public List<RecordViewModel> Records { get; set; }
+        [JsonIgnore]
+        public GroupViewModel Group { get; set; }
     }
 
     public class SessionNetworkViewModel : BaseViewModel<Session>
