@@ -15,6 +15,16 @@ namespace AttendanceSystemIPCamera.Framework
             public const string GET_DATA_BY_ATTENDEE_CODE = "3";
         }
 
+        public class NetworkRoute
+        {
+            public const string LOGIN = "login";
+            public const string REFRESH_ATTENDANCE_DATA = "refresh";
+            public const string CHANGE_REQUEST = "change";
+
+
+        }
+
+
         public class ErrorMessage
         {
             public const string GROUP_NOT_FOUND = "This group cannot be found.";

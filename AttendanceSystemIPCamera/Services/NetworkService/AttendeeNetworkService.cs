@@ -23,7 +23,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
 {
     public interface IAttendeeNetworkService
     {
-        Task<AttendeeViewModel> Start(NetworkMessageViewModel message);
+        Task<AttendeeViewModel> Login(LoginViewModel loginViewModel);
     }
 
     public class AttendeeNetworkService : IAttendeeNetworkService
@@ -42,6 +42,8 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
         private const int MAX_TRY_TIMES = 2;
         private const int TIME_OUT = 5 * 1000;
 
+        private Communicator communicator;
+
         public AttendeeNetworkService(MyUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
@@ -51,17 +53,25 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             this.mapper = AutoMapperConfiguration.GetInstance();
         }
 
-      
-        public async Task<AttendeeViewModel> Start(NetworkMessageViewModel message)
+        public async Task<AttendeeViewModel> Login(LoginViewModel loginViewModel)
         {
-            string reqMess = JsonConvert.SerializeObject(message);
+            var networkRequest = new NetworkRequest<object>();
+            this.GetLocalIpAddress(ref networkRequest);
+            networkRequest.Route = NetworkRoute.LOGIN;
+            networkRequest.Request = loginViewModel;
+
+            string reqMess = JsonConvert.SerializeObject(networkRequest);
             object responseData = await SendRequest(reqMess);
-            if(responseData == null)
+            if (responseData == null)
             {
                 throw new BaseException(ErrorMessage.NETWORK_ERROR);
             }
-            return await ProcessReponseMessage(responseData);
+            var attendee = await ProcessLoginResponse(responseData);
+
+            if (attendee != null) return attendee;
+            throw new BaseException(ErrorMessage.LOGIN_FAIL);
         }
+
         private async Task<object> SendRequest(string message)
         {
             bool isContinue = true;
@@ -69,7 +79,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             object responseData = null;
             do
             {
-                Communicator communicator = GetCommunicator(this.supervisorIPAddress);
+                communicator = GetCommunicator(this.supervisorIPAddress);
                 communicator.Send(Encoding.UTF8.GetBytes(message));
                 try
                 {
@@ -96,7 +106,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
                             responseData = receiveTask.Result;
                         }
                     }
-                   
+
                     isContinue = false;
                 }
                 catch (OperationCanceledException)
@@ -118,7 +128,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             return new Communicator(localServer, ref this.remoteHostEP);
         }
 
-        private async Task<AttendeeViewModel> ProcessReponseMessage(object responseData)
+        private async Task<AttendeeViewModel> ProcessLoginResponse(object responseData)
         {
             //process response
             var attendanceInfo = JsonConvert.DeserializeObject<AttendanceNetworkViewModel>(responseData.ToString());
@@ -176,6 +186,16 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
                 }
             }
             return attendee;
+        }
+        private void GetLocalIpAddress(ref NetworkRequest<object> networkRequest)
+        {
+            IPAddress localIp = null;
+            IPAddress.TryParse(NetworkUtils.GetLocalIPAddress(), out localIp);
+            if (localIp != null)
+            {
+                networkRequest.IPAddress = localIp.ToString();
+            }
+            else throw new BaseException(ErrorMessage.CANNOT_GET_LOCAL_IP_ADDRESS);
         }
 
     }
