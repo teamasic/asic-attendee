@@ -72,20 +72,23 @@ namespace AttendanceSystemIPCamera.Services.GroupService
 
         public async Task<AttendeeViewModel> Login(LoginViewModel loginViewModel)
         {
-            IPAddress localIp = null;
-            IPAddress.TryParse(NetworkUtils.GetLocalIPAddress(), out localIp);
-            if (localIp != null)
-            {
-                var networkMessage = new NetworkMessageViewModel()
-                {
-                    IPAddress = localIp.ToString(),
-                    Message = loginViewModel
-                };
-                var attendee = await unitOfWork.AttendeeNetworkService.Start(networkMessage);
-                if (attendee != null) return attendee;
-                throw new BaseException(ErrorMessage.LOGIN_FAIL);
-            }
-            else throw new BaseException(ErrorMessage.CANNOT_GET_LOCAL_IP_ADDRESS);
+            //IPAddress localIp = null;
+            //IPAddress.TryParse(NetworkUtils.GetLocalIPAddress(), out localIp);
+            //if (localIp != null)
+            //{
+            //    var networkRequest = new NetworkRequest<LoginViewModel>()
+            //    {
+            //        IPAddress = localIp.ToString(),
+            //        Route = NetworkRoute.LOGIN,
+            //        Request = loginViewModel
+            //    };
+            //    var attendee = await unitOfWork.AttendeeNetworkService.Start(networkRequest);
+            //    if (attendee != null) return attendee;
+            //    throw new BaseException(ErrorMessage.LOGIN_FAIL);
+            //}
+            //else throw new BaseException(ErrorMessage.CANNOT_GET_LOCAL_IP_ADDRESS);
+
+            return await unitOfWork.AttendeeNetworkService.Login(loginViewModel);
         }
 
         public Attendee GetByIdWithAttendeeGroups(int attendeeId)

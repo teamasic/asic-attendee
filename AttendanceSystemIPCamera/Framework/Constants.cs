@@ -15,6 +15,16 @@ namespace AttendanceSystemIPCamera.Framework
             public const string GET_DATA_BY_ATTENDEE_CODE = "3";
         }
 
+        public class NetworkRoute
+        {
+            public const string LOGIN = "login";
+            public const string REFRESH_ATTENDANCE_DATA = "refresh";
+            public const string CHANGE_REQUEST = "change";
+
+
+        }
+
+
         public class ErrorMessage
         {
             public const string GROUP_NOT_FOUND = "This group cannot be found.";
@@ -24,6 +34,8 @@ namespace AttendanceSystemIPCamera.Framework
             public const string CANNOT_GET_LOCAL_IP_ADDRESS = "Cannot get local ip address.";
 
             public static string ATTENDEE_NOT_FOUND = "Attendee not found";
+
+            public static string NETWORK_ERROR = "Cannot connect to supervisor";
         }
     }
 }

@@ -41,10 +41,10 @@ class PageLayout extends React.Component<
 							<Icon type="hdd" />
 							<span>Your groups</span>
 						</Menu.Item>
-						<Menu.Item key="2">
+						{/* <Menu.Item key="2">
 							<Icon type="sync" />
 							<span>Refresh</span>
-						</Menu.Item>
+						</Menu.Item> */}
 						<Menu.Item key="3" onClick={this.logout}>
 							<Icon type="logout" />
 							<span>Logout</span>

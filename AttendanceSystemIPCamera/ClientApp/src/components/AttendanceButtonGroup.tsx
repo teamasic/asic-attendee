@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button } from 'antd';
+import { Button, Icon } from 'antd';
 import moment from 'moment';
 
 const buttonGroupState = {
@@ -32,8 +32,13 @@ export default class AttendanceButtonGroup extends React.Component<ButtonGroupPr
 
     render() {
         return (<ButtonGroup className="record-button-group">
-            <Button onClick={this.handleOnClick} id='previous'>Previous</Button>
-            <Button onClick={this.handleOnClick} id='next'>Next</Button>
+            <Button onClick={this.handleOnClick} id='previous'>
+                <Icon type="caret-left" />
+                Previous
+                </Button>
+            <Button onClick={this.handleOnClick} id='next'>
+                <Icon type="caret-right" />
+                Next</Button>
             <Button onClick={this.handleOnClick} id='today'>Today</Button>
         </ButtonGroup>)
     }

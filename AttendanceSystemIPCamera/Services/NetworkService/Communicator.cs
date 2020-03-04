@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AttendanceSystemIPCamera.Services.NetworkService
 {
@@ -11,6 +12,8 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
         protected Sender sender;
         protected Receiver receiver;
         protected IPEndPoint remoteHostEP;
+
+        public IPAddress RemoteHostIPAddress { get => remoteHostEP.Address; }
 
         public Communicator(UdpClient localServer, ref IPEndPoint remoteHostEP)
         {
@@ -31,7 +34,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
 
         public void Send(byte[] plainMessage)
         {
-            if(sender != null)
+            if (sender != null)
             {
                 sender.Start(plainMessage, remoteHostEP);
             }
@@ -39,12 +42,21 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
 
         public object Receive()
         {
-            if(receiver != null)
+            if (receiver != null)
             {
                 return receiver.Start(ref remoteHostEP);
             }
             return null;
         }
+
+        //public async Task<object> ReceiveAsync()
+        //{
+        //    if (receiver != null)
+        //    {
+        //        return receiver.StartAsync(ref remoteHostEP);
+        //    }
+        //    return null;
+        //}
 
     }
 }

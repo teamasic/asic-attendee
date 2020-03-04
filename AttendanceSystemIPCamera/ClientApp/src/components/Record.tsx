@@ -12,7 +12,7 @@ import { extendMoment } from 'moment-range';
 import { constants } from '../constant';
 import Attendee from '../models/Attendee';
 import RecordSearch from '../models/RecordSearch';
-import { Spin, Button } from 'antd';
+import { Spin, Button, Icon } from 'antd';
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -72,7 +72,10 @@ class Record extends React.PureComponent<RecordProps, RecordComponentState> {
             (this.props.isLoading) ? <Spin /> :
                 <>
                     <Button.Group>
-                        <Button type="primary" onClick={(e) => this.handleRefresh()}>Refresh</Button>
+                        <Button type="primary" onClick={(e) => this.handleRefresh()}>
+                            <Icon type="sync"/>
+                            Refresh
+                        </Button>
                     </Button.Group>
                     <AttendanceButtonGroup onNavigate={this.onNavigate} today={this.state.showDate} />
                     <AttendanceTable

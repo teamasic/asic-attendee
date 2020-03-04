@@ -40,6 +40,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\NetworkService\SupervisorNetworkService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="ClientApp\src\components\Login.js" />
     <None Remove="ClientApp\src\components\Login.js.map" />
     <None Remove="ClientApp\src\components\Login.tsx" />

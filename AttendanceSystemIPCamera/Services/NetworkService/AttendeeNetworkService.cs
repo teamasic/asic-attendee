@@ -16,24 +16,33 @@ using System.Threading.Tasks;
 using AttendanceSystemIPCamera.Framework.AutoMapperProfiles;
 using System.Linq;
 using AttendanceSystemIPCamera.Framework;
+using System.Threading;
+using static AttendanceSystemIPCamera.Framework.Constants;
 
 namespace AttendanceSystemIPCamera.Services.NetworkService
 {
     public interface IAttendeeNetworkService
     {
-        Task<AttendeeViewModel> Start(NetworkMessageViewModel message);
+        Task<AttendeeViewModel> Login(LoginViewModel loginViewModel);
     }
 
     public class AttendeeNetworkService : IAttendeeNetworkService
     {
         protected UdpClient localServer;
         protected IPEndPoint remoteHostEP;
+        protected IPAddress supervisorIPAddress
+        { get => NetworkUtils.SupervisorAddress; set => NetworkUtils.SupervisorAddress = value; }
 
         private MyUnitOfWork unitOfWork;
         private ISessionService sessionService;
         private IAttendeeService attendeeService;
         private IGroupService groupService;
         private IMapper mapper;
+
+        private const int MAX_TRY_TIMES = 2;
+        private const int TIME_OUT = 5 * 1000;
+
+        private Communicator communicator;
 
         public AttendeeNetworkService(MyUnitOfWork unitOfWork)
         {
@@ -44,24 +53,84 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             this.mapper = AutoMapperConfiguration.GetInstance();
         }
 
-        public AttendeeNetworkService(UdpClient localServer, IPEndPoint remoteHostEP)
+        public async Task<AttendeeViewModel> Login(LoginViewModel loginViewModel)
         {
-            this.localServer = localServer;
-            this.remoteHostEP = remoteHostEP;
+            var networkRequest = new NetworkRequest<object>();
+            this.GetLocalIpAddress(ref networkRequest);
+            networkRequest.Route = NetworkRoute.LOGIN;
+            networkRequest.Request = loginViewModel;
+
+            string reqMess = JsonConvert.SerializeObject(networkRequest);
+            object responseData = await SendRequest(reqMess);
+            if (responseData == null)
+            {
+                throw new BaseException(ErrorMessage.NETWORK_ERROR);
+            }
+            var attendee = await ProcessLoginResponse(responseData);
+
+            if (attendee != null) return attendee;
+            throw new BaseException(ErrorMessage.LOGIN_FAIL);
         }
 
-        public async Task<AttendeeViewModel> Start(NetworkMessageViewModel message)
+        private async Task<object> SendRequest(string message)
         {
-            if (localServer == null) localServer = new UdpClient();
+            bool isContinue = true;
+            int i = 0;
+            object responseData = null;
+            do
+            {
+                communicator = GetCommunicator(this.supervisorIPAddress);
+                communicator.Send(Encoding.UTF8.GetBytes(message));
+                try
+                {
+                    var cts = new CancellationTokenSource();
+                    cts.CancelAfter(TIME_OUT);
 
-            string reqMess = JsonConvert.SerializeObject(message);
-            var remoteHostEP = new IPEndPoint(IPAddress.Broadcast, NetworkUtils.RunningPort);
-            if (this.remoteHostEP != null) remoteHostEP = this.remoteHostEP;
+                    var receiveTask = Task.Run(() =>
+                    {
+                        object responseData = communicator.Receive();
+                        this.supervisorIPAddress = communicator.RemoteHostIPAddress; //save supervisor ip address
+                        return responseData;
+                    }, cts.Token);
 
-            Communicator communicator = new Communicator(localServer, ref remoteHostEP);
-            communicator.Send(Encoding.UTF8.GetBytes(reqMess));
+                    var tcs = new TaskCompletionSource<bool>();
+                    using (cts.Token.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
+                    {
+                        if (receiveTask != await Task.WhenAny(receiveTask, tcs.Task))
+                        {
+                            this.localServer.Close();
+                            throw new OperationCanceledException(cts.Token);
+                        }
+                        else
+                        {
+                            responseData = receiveTask.Result;
+                        }
+                    }
 
-            object responseData = communicator.Receive();
+                    isContinue = false;
+                }
+                catch (OperationCanceledException)
+                {
+                    this.supervisorIPAddress = IPAddress.Broadcast; // reset to ip broadcast
+                }
+                i++;
+            } while (isContinue && i < MAX_TRY_TIMES);
+            return responseData;
+        }
+
+        private Communicator GetCommunicator(IPAddress ipAddress)
+        {
+            if (localServer == null || localServer?.Client == null)
+                localServer = new UdpClient();
+
+            this.supervisorIPAddress = ipAddress;
+            this.remoteHostEP = new IPEndPoint(ipAddress, NetworkUtils.RunningPort);
+            return new Communicator(localServer, ref this.remoteHostEP);
+        }
+
+        private async Task<AttendeeViewModel> ProcessLoginResponse(object responseData)
+        {
+            //process response
             var attendanceInfo = JsonConvert.DeserializeObject<AttendanceNetworkViewModel>(responseData.ToString());
             if (attendanceInfo != null && attendanceInfo.Success)
             {
@@ -117,6 +186,16 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
                 }
             }
             return attendee;
+        }
+        private void GetLocalIpAddress(ref NetworkRequest<object> networkRequest)
+        {
+            IPAddress localIp = null;
+            IPAddress.TryParse(NetworkUtils.GetLocalIPAddress(), out localIp);
+            if (localIp != null)
+            {
+                networkRequest.IPAddress = localIp.ToString();
+            }
+            else throw new BaseException(ErrorMessage.CANNOT_GET_LOCAL_IP_ADDRESS);
         }
 
     }
