@@ -24,6 +24,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
     public interface IAttendeeNetworkService
     {
         Task<AttendeeViewModel> Login(LoginViewModel loginViewModel);
+        public Task<ChangeRequestSimpleViewModel> CreateChangeRequest(CreateChangeRequestViewModel viewModel);
     }
 
     public class AttendeeNetworkService : IAttendeeNetworkService
@@ -40,7 +41,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
         private IMapper mapper;
 
         private const int MAX_TRY_TIMES = 2;
-        private const int TIME_OUT = 5 * 1000;
+        private const int TIME_OUT = 100 * 1000;
 
         private Communicator communicator;
 
@@ -55,10 +56,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
 
         public async Task<AttendeeViewModel> Login(LoginViewModel loginViewModel)
         {
-            var networkRequest = new NetworkRequest<object>();
-            this.GetLocalIpAddress(ref networkRequest);
-            networkRequest.Route = NetworkRoute.LOGIN;
-            networkRequest.Request = loginViewModel;
+            var networkRequest = GetNetworkRequest(NetworkRoute.LOGIN, loginViewModel);
 
             string reqMess = JsonConvert.SerializeObject(networkRequest);
             object responseData = await SendRequest(reqMess);
@@ -71,6 +69,31 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             if (attendee != null) return attendee;
             throw new BaseException(ErrorMessage.LOGIN_FAIL);
         }
+
+        private NetworkRequest<object> GetNetworkRequest(string route, object request)
+        {
+            var networkRequest = new NetworkRequest<object>();
+            this.GetLocalIpAddress(ref networkRequest);
+            networkRequest.Route = route;
+            networkRequest.Request = request;
+            return networkRequest;
+        }
+
+        public async Task<ChangeRequestSimpleViewModel> CreateChangeRequest(CreateChangeRequestViewModel viewModel)
+        {
+            var networkRequest = GetNetworkRequest(NetworkRoute.CHANGE_REQUEST, viewModel);
+
+            string reqMess = JsonConvert.SerializeObject(networkRequest);
+            object responseData = await SendRequest(reqMess);
+            if (responseData == null)
+            {
+                throw new BaseException(ErrorMessage.NETWORK_ERROR);
+            }
+            var newChangeRequest = JsonConvert.DeserializeObject<ChangeRequestSimpleViewModel>(responseData.ToString());
+            if (newChangeRequest != null) return newChangeRequest;
+            throw new BaseException(ErrorMessage.CHANGE_REQUEST_FAIL);
+        }
+
 
         private async Task<object> SendRequest(string message)
         {

@@ -58,6 +58,7 @@ namespace AttendanceSystemIPCamera.Services.RoomService
             };
             await changeRequestRepository.Add(newRequest);
             unitOfWork.Commit();
+            unitOfWork.AttendeeNetworkService.CreateChangeRequest(viewModel);
             return newRequest;
         }
 
