@@ -41,7 +41,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
         private IMapper mapper;
 
         private const int MAX_TRY_TIMES = 2;
-        private const int TIME_OUT = 100 * 1000;
+        private const int TIME_OUT = 20 * 1000;
 
         private Communicator communicator;
 
