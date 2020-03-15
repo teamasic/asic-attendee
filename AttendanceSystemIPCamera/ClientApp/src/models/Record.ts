@@ -1,4 +1,6 @@
-﻿export default interface Record {
+﻿import ChangeRequest from "./ChangeRequest";
+
+export default interface Record {
     id: number;
     name: string;
     groupCode: string;
@@ -6,6 +8,7 @@
     startTime: Date;
     endTime: Date;
     present: boolean
+    changeRequest?: ChangeRequest;
 }
 
 export interface RecordViewModel{

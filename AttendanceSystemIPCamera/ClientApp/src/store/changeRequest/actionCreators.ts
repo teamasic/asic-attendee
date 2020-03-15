@@ -3,6 +3,7 @@ import { AppThunkAction } from "..";
 import ChangeRequest, { ChangeRequestStatusFilter } from '../../models/ChangeRequest';
 import * as services from "../../services/changeRequest";
 import CreateChangeRequest from "../../models/CreateChangeRequest";
+import Record from "../../models/Record";
 
 export const ACTIONS = {
     RECEIVE_CHANGE_REQUEST_DATA: 'RECEIVE_CHANGE_REQUEST_DATA',
@@ -11,7 +12,8 @@ export const ACTIONS = {
     PROCESS_CHANGE_REQUEST: 'PROCESS_CHANGE_REQUEST',
     START_CREATE_CHANGE_REQUEST: "START_CREATE_CHANGE_REQUEST",
     STOP_CREATE_CHANGE_REQUEST: "STOP_CREATE_CHANGE_REQUEST",
-    CREATED_CHANGE_REQUEST: "CREATED_CHANGE_REQUEST"
+    CREATED_CHANGE_REQUEST: "CREATED_CHANGE_REQUEST",
+    ADD_NEW_CHANGE_REQUEST: "ADD_NEW_CHANGE_REQUEST"
 }
 
 function startRequestChangeRequests() {
@@ -74,12 +76,20 @@ function stopCreateChangeRequest() {
 }
 
 const createChangeRequest = (changeRequest: CreateChangeRequest,
+    record: Record,
     onSuccess: Function, onError: Function): AppThunkAction => async (dispatch, getState) => {
     dispatch(startCreateChangeRequest());
 
     const apiResponse: ApiResponse = await services.createChangeRequest(changeRequest);
-        dispatch(stopCreateChangeRequest());
-    if (apiResponse.success) {
+    dispatch(stopCreateChangeRequest());
+        if (apiResponse.success) {
+            const newChangeRequest = apiResponse.data;
+            record.changeRequest = {
+                ...newChangeRequest,
+                groupCode: record.groupCode,
+                groupName: record.groupName,
+                sessionTime: record.startTime
+            };
         onSuccess();
     } else {
         onError();

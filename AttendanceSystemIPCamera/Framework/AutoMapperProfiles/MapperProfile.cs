@@ -27,6 +27,8 @@ namespace AttendanceSystemIPCamera.Framework.AutoMapperProfiles
             CreateMap<ChangeRequest, ChangeRequestSimpleViewModel>().ReverseMap();
             CreateMap<ChangeRequest, CreateChangeRequestViewModel>().ReverseMap();
             CreateMap<ChangeRequest, ProcessChangeRequestViewModel>().ReverseMap();
+            CreateMap<ChangeRequest, ChangeRequestViewModel>().ReverseMap();
+            CreateMap<ChangeRequest, ChangeRequestNetworkViewModel>().ReverseMap();
         }
     }
 }

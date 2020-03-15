@@ -41,6 +41,16 @@ namespace AttendanceSystemIPCamera.Controllers
             });
         }
 
+        [HttpGet("{id}")]
+        public Task<BaseResponse<ChangeRequestSimpleViewModel>> GetChangeRequest(int id)
+        {
+            return ExecuteInMonitoring(async () =>
+            {
+                var changeRequest = await changeRequestService.GetById(id);
+                return mapper.Map<ChangeRequestSimpleViewModel>(changeRequest);
+            });
+        }
+
         [HttpPost]
         public Task<BaseResponse<ChangeRequestSimpleViewModel>> Create([FromBody] CreateChangeRequestViewModel viewModel)
         {

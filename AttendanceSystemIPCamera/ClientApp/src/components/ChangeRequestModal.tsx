@@ -12,6 +12,7 @@ import { Typography } from 'antd';
 import classNames from 'classnames';
 
 const { Title } = Typography;
+const { confirm, success, error } = Modal;
 
 interface ChangeRequestModalState {
     comment: string;
@@ -30,7 +31,6 @@ type ChangeRequestProps =
     & typeof changeRequestActionCreators // ... plus action creators we've requested
     & RouteComponentProps<{}>; // ... plus incoming routing parameters
 
-
 class ChangeRequestModal extends React.PureComponent<ChangeRequestProps, ChangeRequestModalState> {
     state = {
         comment: ''
@@ -48,17 +48,22 @@ class ChangeRequestModal extends React.PureComponent<ChangeRequestProps, ChangeR
                 recordId: this.props.record!.id,
                 present: !this.props.record!.present, // the desired state
                 comment: this.state.comment,
-            }, this.onSubmitSuccess, this.onSubmitError)
+            }, this.props.record, this.onSubmitSuccess, this.onSubmitError)
         }
     }
 
     private onSubmitSuccess = () => {
         this.props.hideModal();
-        message.success('Successfully created change request.');
+        success({
+            title: 'Successfully created change request'
+        });
     };
 
     private onSubmitError = () => {
-        message.error('An error happened, please try again.');
+        error({
+            title: 'Error in processing change request',
+            content: 'Please try again.'
+        });
     };
 
     public render() {

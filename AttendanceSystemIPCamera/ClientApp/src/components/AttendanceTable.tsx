@@ -8,6 +8,7 @@ import { recordActionCreators } from '../store/record/recordActionCreators';
 import { MinusCircleOutline } from '@ant-design/icons';
 import ChangeRequestModal from './ChangeRequestModal';
 import classNames from 'classnames';
+import ChangeRequestModalSummary from './ChangeRequestModalSummary';
 
 const initState = {
     columns: [{
@@ -100,6 +101,7 @@ interface AttendanceTableState {
     units: Unit[];
     events: Event[];
     modalVisible: boolean;
+    summaryModalVisible: boolean;
     activeRecord?: Record;
 }
 
@@ -119,7 +121,8 @@ export default class AttendanceTable extends React.Component<AttendanceTableProp
             columns: this.props.columns,
             events: this.props.events,
             units: this.props.units,
-            modalVisible: false
+            modalVisible: false,
+            summaryModalVisible: false
         };
     }
 
@@ -130,28 +133,54 @@ export default class AttendanceTable extends React.Component<AttendanceTableProp
                 record={this.state.activeRecord}
                 hideModal={() => this.hideModal()}
             />
+            {
+                this.state.activeRecord && this.state.activeRecord.changeRequest &&
+                <ChangeRequestModalSummary
+                    visible={this.state.summaryModalVisible}
+                    changeRequest={this.state.activeRecord.changeRequest}
+                    hideModal={() => this.hideModal()}
+                />
+            }
             <Table columns={this.renderColumns()}
                 dataSource={this.renderDataSource()}
                 bordered />
         </>);
     }
 
-    private showModal(id: number) {
-        this.setState({
-            modalVisible: true,
-            activeRecord: this.props.records.find(r => r.id === id)
-        });
+    private showModal(activeRecord: Record) {
+        if (activeRecord.changeRequest != null) {
+            this.setState({
+                summaryModalVisible: true,
+                activeRecord
+            });
+        } else {
+            this.setState({
+                modalVisible: true,
+                activeRecord
+            });
+        }
     }
 
     private hideModal() {
         this.setState({
-            modalVisible: false
+            modalVisible: false,
+            summaryModalVisible: false
         });
     }
 
     private renderColor(cell: Cell, record: any, index: number) {
         const hasRecord = cell.id > 0;
         const isAbsent = cell.text.includes("Absent");
+        const activeRecord = this.props.records.find(r => r.id === cell.id);
+        if (!activeRecord) return <></>;
+        let icon;
+        if (hasRecord && isAbsent) {
+            if (activeRecord.changeRequest) {
+                icon = <Icon type="exclamation-circle" />;
+            } else {
+                icon = <Icon type="question-circle" />;
+            }
+        }
         return {
             props: {
                 className: classNames("table-cell", {
@@ -166,14 +195,12 @@ export default class AttendanceTable extends React.Component<AttendanceTableProp
                 */
                 onClick: () => {
                     if (hasRecord && isAbsent) {
-                        this.showModal(cell.id);
+                        this.showModal(activeRecord);
                     }
                 }
             },
             children: <>
-                {
-                    (hasRecord && isAbsent) && <Icon type="question-circle" />
-                }
+                {icon}
                 <div className="table-cell-text">
                     {cell.text}
                 </div>

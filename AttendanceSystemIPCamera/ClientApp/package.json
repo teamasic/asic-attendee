@@ -5,6 +5,7 @@
     "dependencies": {
         "@types/axios": "^0.14.0",
         "@types/classnames": "^2.2.9",
+        "@types/date-fns": "^2.6.0",
         "@types/react-big-calendar": "^0.22.3",
         "antd": "^3.26.8",
         "axios": "^0.19.2",
@@ -13,6 +14,7 @@
         "bulma": "^0.8.0",
         "classnames": "^2.2.6",
         "connected-react-router": "6.5.2",
+        "date-fns": "^2.11.0",
         "history": "4.10.1",
         "jquery": "^3.4.1",
         "merge": "1.2.1",

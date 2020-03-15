@@ -52,8 +52,6 @@ namespace AttendanceSystemIPCamera.Services.RoomService
             {
                 Record = record,
                 Comment = viewModel.Comment,
-                OldState = record.Present,
-                NewState = viewModel.Present,
                 Status = ChangeRequestStatus.UNRESOLVED
             };
             await changeRequestRepository.Add(newRequest);
@@ -72,11 +70,12 @@ namespace AttendanceSystemIPCamera.Services.RoomService
             var changeRequest = await changeRequestRepository.GetByIdSimple(viewModel.ChangeRequestId);
             if (viewModel.Approved)
             {
-                changeRequest.Record.Present = changeRequest.NewState;
+                changeRequest.Record.Present = true;
                 changeRequest.Status = ChangeRequestStatus.APPROVED;
             }
             else
             {
+                changeRequest.Record.Present = false;
                 changeRequest.Status = ChangeRequestStatus.REJECTED;
             }
             changeRequestRepository.Update(changeRequest);
