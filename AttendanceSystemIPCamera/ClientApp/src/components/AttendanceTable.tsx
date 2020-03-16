@@ -1,10 +1,14 @@
 import * as React from 'react';
 import Unit from '../models/Unit';
-import { Table } from 'antd';
+import Record from '../models/Record';
+import { Table, Button, Modal, Form, Input, Icon } from 'antd';
 import { unitActionCreators } from '../store/unit/actionCreators';
 import { ColumnProps } from 'antd/lib/table';
 import { recordActionCreators } from '../store/record/recordActionCreators';
-
+import { MinusCircleOutline } from '@ant-design/icons';
+import ChangeRequestModal from './ChangeRequestModal';
+import classNames from 'classnames';
+import ChangeRequestModalSummary from './ChangeRequestModalSummary';
 
 const initState = {
     columns: [{
@@ -75,15 +79,20 @@ interface Column {
     name: string
 }
 
+class Cell {
+    id = 0;
+    text = '';
+}
+
 class DataSource {
     key = 0;
-    sunday = '';
-    monday = '';
-    tuesday = '';
-    wednesday = '';
-    thursday = '';
-    friday = '';
-    saturday = '';
+    sunday = new Cell();
+    monday = new Cell();
+    tuesday = new Cell();
+    wednesday = new Cell();
+    thursday = new Cell();
+    friday = new Cell();
+    saturday = new Cell();
     unit = '';
 }
 
@@ -91,15 +100,17 @@ interface AttendanceTableState {
     columns: Column[];
     units: Unit[];
     events: Event[];
+    modalVisible: boolean;
+    summaryModalVisible: boolean;
+    activeRecord?: Record;
 }
 
 interface AttendanceTableProps {
     columns: Column[];
     units: Unit[];
     events: Event[];
+    records: Record[];
 }
-
-
 
 export default class AttendanceTable extends React.Component<AttendanceTableProps, AttendanceTableState> {
     readonly state: AttendanceTableState;
@@ -109,24 +120,91 @@ export default class AttendanceTable extends React.Component<AttendanceTableProp
         this.state = {
             columns: this.props.columns,
             events: this.props.events,
-            units: this.props.units
+            units: this.props.units,
+            modalVisible: false,
+            summaryModalVisible: false
         };
     }
 
     render = () => {
         return (<>
+            <ChangeRequestModal
+                visible={this.state.modalVisible}
+                record={this.state.activeRecord}
+                hideModal={() => this.hideModal()}
+            />
+            {
+                this.state.activeRecord && this.state.activeRecord.changeRequest &&
+                <ChangeRequestModalSummary
+                    visible={this.state.summaryModalVisible}
+                    changeRequest={this.state.activeRecord.changeRequest}
+                    hideModal={() => this.hideModal()}
+                />
+            }
             <Table columns={this.renderColumns()}
                 dataSource={this.renderDataSource()}
                 bordered />
         </>);
     }
 
-    private renderColor(text: string, record: any, index: number) {
+    private showModal(activeRecord: Record) {
+        if (activeRecord.changeRequest != null) {
+            this.setState({
+                summaryModalVisible: true,
+                activeRecord
+            });
+        } else {
+            this.setState({
+                modalVisible: true,
+                activeRecord
+            });
+        }
+    }
+
+    private hideModal() {
+        this.setState({
+            modalVisible: false,
+            summaryModalVisible: false
+        });
+    }
+
+    private renderColor(cell: Cell, record: any, index: number) {
+        const hasRecord = cell.id > 0;
+        const isAbsent = cell.text.includes("Absent");
+        const activeRecord = this.props.records.find(r => r.id === cell.id);
+        if (!activeRecord) return <></>;
+        let icon;
+        if (hasRecord && isAbsent) {
+            if (activeRecord.changeRequest) {
+                icon = <Icon type="exclamation-circle" />;
+            } else {
+                icon = <Icon type="question-circle" />;
+            }
+        }
         return {
             props: {
-                style: { background: text.includes("Present") ? "green" : text.includes('Absent') ? "red" : "" }
+                className: classNames("table-cell", {
+                    'is-absent': hasRecord && isAbsent,
+                    'is-present': hasRecord && !isAbsent
+                }),
+                /*
+                style: {
+                    background: cell.text.includes("Present") ? "#3BDE86" :
+                        cell.text.includes('Absent') ? "#FF6260" : ""
+                },
+                */
+                onClick: () => {
+                    if (hasRecord && isAbsent) {
+                        this.showModal(activeRecord);
+                    }
+                }
             },
-            children: <div>{text}</div>
+            children: <>
+                {icon}
+                <div className="table-cell-text">
+                    {cell.text}
+                </div>
+            </>
         };
     }
 
@@ -168,27 +246,31 @@ export default class AttendanceTable extends React.Component<AttendanceTableProp
     }
 
     private renderEvent(event: Event, data: DataSource) {
+        const ev = {
+            id: event.id,
+            text: event.title
+        };
         switch (event.col) {
             case 'sunday':
-                data.sunday = event.title;
+                data.sunday = ev;
                 break;
             case 'monday':
-                data.monday = event.title;
+                data.monday = ev;
                 break;
             case 'tuesday':
-                data.tuesday = event.title;
+                data.tuesday = ev;
                 break;
             case 'wednesday':
-                data.wednesday = event.title;
+                data.wednesday = ev;
                 break;
             case 'thursday':
-                data.thursday = event.title;
+                data.thursday = ev;
                 break;
             case 'friday':
-                data.friday = event.title;
+                data.friday = ev;
                 break;
             case 'saturday':
-                data.saturday = event.title;
+                data.saturday = ev;
                 break;
         }
         return data;

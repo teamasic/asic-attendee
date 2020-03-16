@@ -78,7 +78,12 @@ namespace AttendanceSystemIPCamera.Services.SessionService
                     var record = session.Records.LastOrDefault(r => r.AttendeeId == attendeeId);
                     if(record != null)
                     {
-                        record.Present = s.Records?.LastOrDefault()?.Present ?? record.Present;
+                        var networkRecord = s.Records?.LastOrDefault();
+                        record.Present = networkRecord?.Present ?? record.Present;
+                        if (networkRecord != null && networkRecord.ChangeRequest != null)
+                        {
+                            record.ChangeRequest.Status = networkRecord.ChangeRequest.Status;
+                        }
                     }
                     else
                     {

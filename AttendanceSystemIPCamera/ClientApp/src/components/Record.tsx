@@ -78,7 +78,11 @@ class Record extends React.PureComponent<RecordProps, RecordComponentState> {
                         </Button>
                     </Button.Group>
                     <AttendanceButtonGroup onNavigate={this.onNavigate} today={this.state.showDate} />
-                    <AttendanceTable units={this.mapToUnits()} columns={this.mapToColumns()} events={this.mapToEvents()} />
+                    <AttendanceTable
+                        records={this.props.recordData}
+                        units={this.mapToUnits()}
+                        columns={this.mapToColumns()}
+                        events={this.mapToEvents()} />
                 </>
 
         );
