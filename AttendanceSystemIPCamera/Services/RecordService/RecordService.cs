@@ -37,14 +37,28 @@ namespace AttendanceSystemIPCamera.Services.RecordService
             if (attendee != null)
             {
                 List<Record> records = recordRepository.GetByRecordSearch(searchViewModel);
-                var recordAttendanceViewModel = records.Select(r => new RecordAttendanceViewModel()
-                {
-                    Id = r.Id,
-                    Name = r.Session.Name,
-                    StartTime = r.Session.StartTime,
-                    EndTime = r.Session.EndTime,
-                    GroupCode = r.Session.Group.Code,
-                    Present = r.Present
+                var recordAttendanceViewModel = records.Select(r => {
+                    var rec = new RecordAttendanceViewModel()
+                    {
+                        Id = r.Id,
+                        Name = r.Session.Name,
+                        StartTime = r.Session.StartTime,
+                        EndTime = r.Session.EndTime,
+                        GroupCode = r.Session.Group.Code,
+                        GroupName = r.Session.Group.Name,
+                        Present = r.Present
+                    };
+                    if (r.ChangeRequest != null)
+                    {
+                        rec.ChangeRequest = new ChangeRequestViewModel
+                        {
+                            Id = r.ChangeRequest.Id,
+                            Comment = r.ChangeRequest.Comment,
+                            RecordId = r.Id,
+                            Status = r.ChangeRequest.Status
+                        };
+                    }
+                    return rec;
                 })
                 .ToList();
                 return recordAttendanceViewModel;

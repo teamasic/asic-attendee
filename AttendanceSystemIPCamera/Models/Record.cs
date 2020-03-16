@@ -17,5 +17,6 @@ namespace AttendanceSystemIPCamera.Models
         public int SessionId { get; set; }
         public Session Session { get; set; }
         public bool Present { get; set; }
+        public ChangeRequest ChangeRequest { get; set; }
     }
 }

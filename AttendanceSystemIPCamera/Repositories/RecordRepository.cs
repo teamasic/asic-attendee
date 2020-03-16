@@ -25,6 +25,7 @@ namespace AttendanceSystemIPCamera.Repositories
                 .Where(r => r.Session.StartTime > search.StartTime)
                 .Where(r => r.Session.StartTime <= search.EndTime)
                 .Include(r => r.Session.Group)
+                .Include(r => r.ChangeRequest)
                 .ToList();
             return records;
         }

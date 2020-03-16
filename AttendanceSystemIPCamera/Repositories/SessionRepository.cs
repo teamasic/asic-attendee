@@ -44,6 +44,7 @@ namespace AttendanceSystemIPCamera.Repositories
             return dbSet.Where(s => s.Group.Id == groupId)
                 .Where(s => startTimes.Contains(s.StartTime))
                 .Include(s => s.Records)
+                    .ThenInclude(r => r.ChangeRequest)
                 .ToList();
         }
     }

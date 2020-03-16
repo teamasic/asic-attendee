@@ -1,11 +1,13 @@
+import {Cell} from "../components/Record"
+
 export default interface AttendanceTableRow {
     key: string,
-    unit?: string, //unit label to display
-    sunday?: string,
-    monday?: string,
-    tuesday?: string,
-    wednesday?: string,
-    thursday?: string,
-    friday?: string,
-    saturday?: string,
+    unit?: Cell, //unit label to display
+    sunday?: Cell,
+    monday?: Cell,
+    tuesday?: Cell,
+    wednesday?: Cell,
+    thursday?: Cell,
+    friday?: Cell,
+    saturday?: Cell,
 }

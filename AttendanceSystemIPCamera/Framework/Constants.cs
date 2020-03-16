@@ -36,6 +36,8 @@ namespace AttendanceSystemIPCamera.Framework
             public static string ATTENDEE_NOT_FOUND = "Attendee not found";
 
             public static string NETWORK_ERROR = "Cannot connect to supervisor";
+
+            public const string CHANGE_REQUEST_FAIL = "Failed to create change request.";
         }
     }
 }

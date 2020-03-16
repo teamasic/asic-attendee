@@ -28,6 +28,7 @@ namespace AttendanceSystemIPCamera.Repositories.UnitOfWork
         private ISessionRepository sessionRepository;
         private IAttendeeRepository attendeeRepository;
         private IRecordRepository recordRepository;
+        private IChangeRequestRepository changeRequestRepository;
 
         public IRecordRepository RecordRepository
         {
@@ -72,6 +73,17 @@ namespace AttendanceSystemIPCamera.Repositories.UnitOfWork
                     sessionRepository = new SessionRepository(DbContext);
                 }
                 return sessionRepository;
+            }
+        }
+        public IChangeRequestRepository ChangeRequestRepository
+        {
+            get
+            {
+                if (changeRequestRepository == null)
+                {
+                    changeRequestRepository = new ChangeRequestRepository(DbContext);
+                }
+                return changeRequestRepository;
             }
         }
         #endregion

@@ -23,6 +23,10 @@ import { Dictionary } from '../models/Dictionary';
 import Record from '../models/Record';
 import Unit from '../models/Unit';
 import { stringify } from 'querystring';
+import ChangeRequestModal from './ChangeRequestModal';
+import classNames from 'classnames';
+import ChangeRequestModalSummary from './ChangeRequestModalSummary';
+import { MinusCircleOutline } from '@ant-design/icons';
 
 // At runtime, Redux will merge together...
 type RecordProps =
@@ -36,7 +40,15 @@ interface RecordComponentState {
     attendeeId: number;
     endDate: Date;
     startDate: Date;
-    showDate: Date
+    showDate: Date;
+    modalVisible: boolean;
+    summaryModalVisible: boolean;
+    activeRecord?: Record;
+}
+
+export class Cell {
+    id = 0;
+    text = '';
 }
 
 const moment = extendMoment(Moment);
@@ -56,7 +68,9 @@ class RecordComp extends React.PureComponent<RecordProps, RecordComponentState> 
             attendeeId: attendee.id,
             startDate: moment(this.today).startOf('week').toDate(),
             endDate: moment(this.today).endOf('week').toDate(),
-            showDate: this.today
+            showDate: this.today,
+            modalVisible: false,
+            summaryModalVisible: false
         };
     }
 
@@ -83,6 +97,21 @@ class RecordComp extends React.PureComponent<RecordProps, RecordComponentState> 
                         </Button>
                     </Button.Group>
                     <AttendanceButtonGroup onNavigate={this.onNavigate} today={this.state.showDate} />
+
+                    <ChangeRequestModal
+                        visible={this.state.modalVisible}
+                        record={this.state.activeRecord}
+                        hideModal={() => this.hideModal()}
+                    />
+                    {
+                        this.state.activeRecord && this.state.activeRecord.changeRequest &&
+                        <ChangeRequestModalSummary
+                            visible={this.state.summaryModalVisible}
+                            changeRequest={this.state.activeRecord.changeRequest}
+                            hideModal={() => this.hideModal()}
+                        />
+                    }
+
                     <AttendanceTable bordered dataSource={this.mapToDataSource()} pagination={false}>
                         {this.renderColumns()}
                     </AttendanceTable>
@@ -127,7 +156,8 @@ class RecordComp extends React.PureComponent<RecordProps, RecordComponentState> 
                 key={key}
                 title={title}
                 dataIndex={key}
-                render={(text, record) => this.renderColor(text, record)} />;
+                align='center'
+                render={(text, record, index) => this.renderColor(text, record, index)} />;
         })
     }
 
@@ -154,24 +184,23 @@ class RecordComp extends React.PureComponent<RecordProps, RecordComponentState> 
 
         return this.props.units.map<AttendanceTableRow>((unit: Unit, index) => {
             const unitId = unit.id;
-            // console.log(unit);
             return {
                 key: index.toString(),
                 unit: this.getUnitLabel(unit), // unit label
-                monday: tranformedRecords[unitId] ? tranformedRecords[unitId]["monday"] : "",
-                tuesday: tranformedRecords[unitId] ? tranformedRecords[unitId]["tuesday"] : "",
-                wednesday: tranformedRecords[unitId] ? tranformedRecords[unitId]["wednesday"] : "",
-                thursday: tranformedRecords[unitId] ? tranformedRecords[unitId]["thursday"] : "",
-                friday: tranformedRecords[unitId] ? tranformedRecords[unitId]["friday"] : "",
-                saturday: tranformedRecords[unitId] ? tranformedRecords[unitId]["saturday"] : "",
-                sunday: tranformedRecords[unitId] ? tranformedRecords[unitId]["sunday"] : "",
+                monday: tranformedRecords[unitId] ? tranformedRecords[unitId]["monday"] : undefined,
+                tuesday: tranformedRecords[unitId] ? tranformedRecords[unitId]["tuesday"] : undefined,
+                wednesday: tranformedRecords[unitId] ? tranformedRecords[unitId]["wednesday"] : undefined,
+                thursday: tranformedRecords[unitId] ? tranformedRecords[unitId]["thursday"] : undefined,
+                friday: tranformedRecords[unitId] ? tranformedRecords[unitId]["friday"] : undefined,
+                saturday: tranformedRecords[unitId] ? tranformedRecords[unitId]["saturday"] : undefined,
+                sunday: tranformedRecords[unitId] ? tranformedRecords[unitId]["sunday"] : undefined,
             }
         });
 
     }
 
     private tranformRecords() { //records["1"]["monday"] // slot 1, monday
-        const records: Dictionary<Dictionary<string>> = {};
+        const records: Dictionary<Dictionary<Cell>> = {};
         this.props.recordData.forEach((r, index) => {
             const unit = this.props.units.find(u => u.name == r.name);
             if (unit) {
@@ -179,27 +208,93 @@ class RecordComp extends React.PureComponent<RecordProps, RecordComponentState> 
                     records[unit.id] = {};
                 }
                 const dayInWeek = moment(r.startTime).format("dddd").toLowerCase();
-                records[unit.id][dayInWeek] = r.groupCode + ' - ' + (r.present ? 'Present' : 'Absent');
+                records[unit.id][dayInWeek] = { id: r.id, text: r.groupCode + ' - ' + (r.present ? 'Present' : 'Absent') }
             }
         });
         return records;
     }
 
-    private renderColor(text: string, row: AttendanceTableRow) {
-        console.log();
-        if (text) {
-            return {
-                props: {
-                    style: { background: text.includes("Present") ? "green" : text.includes('Absent') ? "red" : "" }
-                },
-                children: <div>{text}</div>
-            };
+    private getUnitLabel(unit: Unit) {
+        return {
+            id:-1,
+            text: unit.name + " (" + moment(unit.startTime).format("HH:mm") + " - " + moment(unit.endTime).format("HH:mm") + ")"
+        };
+    }
+
+    private showModal(activeRecord: Record) {
+        if (activeRecord.changeRequest != null) {
+            this.setState({
+                summaryModalVisible: true,
+                activeRecord
+            });
+        } else {
+            this.setState({
+                modalVisible: true,
+                activeRecord
+            });
         }
     }
 
-    private getUnitLabel(unit: Unit) {
-        return unit.name + " (" + moment(unit.startTime).format("HH:mm") + " - " + moment(unit.endTime).format("HH:mm") + ")";
+    private hideModal() {
+        this.setState({
+            modalVisible: false,
+            summaryModalVisible: false
+        });
     }
+
+    private renderColor(cell: Cell, row: AttendanceTableRow, index: number) {
+        if (cell == undefined) {
+            return {
+                props: {
+                    className: classNames("table-cell"),
+                },
+                children: <>
+                    <div className="table-cell-text"></div>
+                </>
+            };
+        }
+        if(cell != undefined && cell.id == -1)
+        {
+            return {
+                children: <>
+                    <div>{cell.text}</div>
+                </>
+            };
+        }
+        const hasRecord = cell.id > 0;
+        const isAbsent = cell.text.includes("Absent");
+        const activeRecord = this.props.recordData.find(r => r.id === cell.id);
+        if (!activeRecord) return <></>;
+        let icon;
+        if (hasRecord && isAbsent) {
+            if (activeRecord.changeRequest) {
+                icon = <Icon type="exclamation-circle" />;
+            } else {
+                icon = <Icon type="question-circle" />;
+            }
+        }
+        return {
+            props: {
+                className: classNames("table-cell", {
+                    'is-absent': hasRecord && isAbsent,
+                    'is-present': hasRecord && !isAbsent
+                }),
+                onClick: () => {
+                    if (hasRecord && isAbsent) {
+                        this.showModal(activeRecord);
+                    }
+                }
+            },
+            children: <>
+                {icon}
+                <div className="table-cell-text">
+                    {cell.text}
+                </div>
+            </>
+        };
+    }
+
+
 }
 
 
