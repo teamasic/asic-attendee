@@ -1,4 +1,5 @@
-﻿using AttendanceSystemIPCamera.Models;
+﻿using AttendanceSystemIPCamera.Framework.MyConfiguration;
+using AttendanceSystemIPCamera.Models;
 using AttendanceSystemIPCamera.Services.GroupService;
 using AttendanceSystemIPCamera.Services.NetworkService;
 using AttendanceSystemIPCamera.Services.RecordService;
@@ -14,9 +15,11 @@ namespace AttendanceSystemIPCamera.Repositories.UnitOfWork
 {
     public class MyUnitOfWork : UnitOfWork
     {
-        
-        public MyUnitOfWork(DbContext dbContext) : base(dbContext)
+        public readonly AppSettings AppSettings;
+
+        public MyUnitOfWork(DbContext dbContext, AppSettings appSettings) : base(dbContext)
         {
+            this.AppSettings = appSettings;
         }
         public IRepository<T> GetRepository<T>() where T : class, BaseEntity
         {

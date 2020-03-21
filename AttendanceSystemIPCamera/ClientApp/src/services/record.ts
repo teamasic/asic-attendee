@@ -3,21 +3,23 @@ import { constants } from "../constant";
 import axios from "axios";
 import RecordSearch from "../models/RecordSearch";
 
-const baseRoute  = constants.BASE_ROUTE + "record";
+const baseRoute = constants.BASE_ROUTE + "record";
 const apify = (path: string) => `${baseRoute}/${path}`;
 
-const transformChangeRequestRecords = (data: any) => {
-    data.data = data.data.map((r: any) => r.changeRequest != null ? ({
-        ...r,
-        changeRequest: {
-            recordId: r.id,
-            groupName: r.groupName,
-            groupCode: r.groupCode,
-            sessionTime: r.startTime,
-            comment: r.changeRequest.comment,
-            status: r.changeRequest.status
-        }
-    }) : r);
+const transformChangeRequestRecords = (responseBody: any) => {
+    if (responseBody.success) {
+        responseBody.data = responseBody.data.map((r: any) => r.changeRequest != null ? ({
+            ...r,
+            changeRequest: {
+                recordId: r.id,
+                groupName: r.groupName,
+                groupCode: r.groupCode,
+                sessionTime: r.startTime,
+                comment: r.changeRequest.comment,
+                status: r.changeRequest.status
+            }
+        }) : r);
+    }
 };
 
 export const getRecords = async (recordSearch: RecordSearch): Promise<ApiResponse> => {

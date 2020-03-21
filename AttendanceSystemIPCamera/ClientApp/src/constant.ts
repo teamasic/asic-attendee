@@ -1,6 +1,7 @@
 export const constants = {
     BASE_ROUTE: "api/",
-    AUTH_IN_LOCAL_STORAGE: "auth"
+    AUTH_IN_LOCAL_STORAGE: "auth",
+    ACCESS_TOKEN: "access_token"
 
 }
 

@@ -15,6 +15,7 @@ using System.Net;
 using AttendanceSystemIPCamera.Utils;
 using AttendanceSystemIPCamera.Framework;
 using static AttendanceSystemIPCamera.Framework.Constants;
+using AttendanceSystemIPCamera.Framework.MyConfiguration;
 
 namespace AttendanceSystemIPCamera.Services.GroupService
 {
@@ -23,19 +24,22 @@ namespace AttendanceSystemIPCamera.Services.GroupService
         Task<AttendeeViewModel> AddAttendeeWithGroupsIfNotInDb(string attendeeCode, string name, List<int> groupIds);
         Task<AttendeeViewModel> Login(LoginViewModel loginViewModel);
         Attendee GetByIdWithAttendeeGroups(int attendeeId);
+        Task<AttendeeViewModel> LoginWithFirebase(UserAuthentication userAuthentication);
     }
 
     public class AttendeeService : BaseService<Attendee>, IAttendeeService
     {
         private readonly IAttendeeRepository attendeeRepository;
+        private readonly AppSettings appSettings;
 
         public AttendeeService(MyUnitOfWork unitOfWork) : base(unitOfWork)
         {
             this.attendeeRepository = unitOfWork.AttendeeRepository;
+            this.appSettings = unitOfWork.AppSettings;
         }
 
         public async Task<AttendeeViewModel> AddAttendeeWithGroupsIfNotInDb(string attendeeCode, string name,
-                                                                                List<int> groupIds)
+                                                                                List<int> groupIds = null)
         {
             var attendee = attendeeRepository.GetByCodeWithAttendeeGroups(attendeeCode);
             if (attendee == null)
@@ -49,18 +53,21 @@ namespace AttendanceSystemIPCamera.Services.GroupService
             }
 
             var attendedGroupIds = attendee.AttendeeGroups.Select(ag => ag.GroupId).ToList();
-            groupIds.ForEach(gId =>
+            if (groupIds != null && groupIds.Count > 0)
             {
-                if (!attendedGroupIds.Contains(gId))
+                groupIds.ForEach(gId =>
                 {
-                    var attGr = new AttendeeGroup()
+                    if (!attendedGroupIds.Contains(gId))
                     {
-                        AttendeeId = attendee.Id,
-                        GroupId = gId
-                    };
-                    attendee.AttendeeGroups.Add(attGr);
-                }
-            });
+                        var attGr = new AttendeeGroup()
+                        {
+                            AttendeeId = attendee.Id,
+                            GroupId = gId
+                        };
+                        attendee.AttendeeGroups.Add(attGr);
+                    }
+                });
+            }
             unitOfWork.Commit();
             return new AttendeeViewModel()
             {
@@ -94,6 +101,35 @@ namespace AttendanceSystemIPCamera.Services.GroupService
         public Attendee GetByIdWithAttendeeGroups(int attendeeId)
         {
             return attendeeRepository.GetByIdWithAttendeeGroups(attendeeId);
+        }
+
+        public async Task<AttendeeViewModel> LoginWithFirebase(UserAuthentication userAuthentication)
+        {
+            var authorizedUser = await RestApi.CallApiAsync<AuthorizedUser>(appSettings.LoginServerApi, userAuthentication);
+            if (authorizedUser == null)
+            {
+                throw new BaseException(ErrorMessage.ATTENDEE_NOT_FOUND);
+            }
+
+            //check role
+            var attendeeRole = (int)RolesEnum.ATTENDEE;
+            if (!authorizedUser.Roles.Contains(attendeeRole.ToString(), StringComparer.OrdinalIgnoreCase))
+            {
+                throw new BaseException(ErrorMessage.NOT_VALID_USER);
+            }
+
+            //check attendee in local app
+            var attendee =
+                await this.AddAttendeeWithGroupsIfNotInDb
+                (authorizedUser.User.RollNumber, authorizedUser.User.Fullname);
+
+            //var accessTokenViewModel = new AccessToken()
+            //{
+            //    Token = authorizedUser.AccessToken,
+            //    Attendee = attendee
+            //};
+            return attendee;
+
         }
     }
 }
