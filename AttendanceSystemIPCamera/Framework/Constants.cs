@@ -13,6 +13,7 @@ namespace AttendanceSystemIPCamera.Framework
             public const string LOGIN_BY_USERNAME_PASSWORD = "1";
             public const string LOGIN_BY_FACE = "2";
             public const string GET_DATA_BY_ATTENDEE_CODE = "3";
+            public const string AES_KEY_PATH = "aes";
         }
 
         public class NetworkRoute
@@ -38,6 +39,15 @@ namespace AttendanceSystemIPCamera.Framework
             public static string NETWORK_ERROR = "Cannot connect to supervisor";
 
             public const string CHANGE_REQUEST_FAIL = "Failed to create change request.";
+
+            public const string NOT_VALID_USER = "Not valid attendee";
+        }
+
+        public enum RolesEnum
+        {
+            ATTENDEE = 1,
+            ADMIN = 2,
+            SUPERVISOR = 3
         }
     }
 }

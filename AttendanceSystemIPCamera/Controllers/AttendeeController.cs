@@ -30,6 +30,15 @@ namespace AttendanceSystemIPCamera.Controllers
            });
         }
 
+        [HttpPost("login/firebase")]
+        public async Task<dynamic> LoginWithFirebase(UserAuthentication userAuthen)
+        {
+            return await ExecuteInMonitoring(async () =>
+            {
+                return await service.LoginWithFirebase(userAuthen);
+            });
+        }
+
 
     }
 }

@@ -4,7 +4,7 @@ import NavMenu from './NavMenu';
 import { Layout, Menu, Breadcrumb, Icon, Divider, Row, Col } from 'antd';
 import '../styles/Layout.css';
 import { constants } from '../constant';
-
+import * as firebase from '../firebase';
 const { Header, Sider, Content, Footer } = Layout;
 
 class PageLayout extends React.Component<
@@ -75,6 +75,7 @@ class PageLayout extends React.Component<
 	private logout(){
 		const authData = localStorage.getItem(constants.AUTH_IN_LOCAL_STORAGE);
 		if(authData != null){
+			firebase.auth.doSignOut();
 			localStorage.removeItem(constants.AUTH_IN_LOCAL_STORAGE);
 			window.location.href = "/";
 		}

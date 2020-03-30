@@ -11,7 +11,8 @@ import Webcam from 'react-webcam';
 import AttendeeLogin from '../models/AttendeeLogin';
 import { loginMethod } from '../constant';
 import { login } from '../services/attendee';
-
+import * as firebase from '../firebase';
+import UserLogin from '../models/UserLogin';
 
 
 // At runtime, Redux will merge together...
@@ -53,6 +54,18 @@ class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
         console.log(this.props);
         console.log(this.state);
     }
+
+    public componentDidMount() {
+        firebase.auth.onAuthStateChanged(authUser => {
+          if (authUser) {
+            authUser.getIdToken().then(token => {
+              console.log(token);
+              const credentials = { firebaseToken: token };
+              this.props.requestLoginWithFirebase(credentials, this.redirect);
+            });
+          }
+        });
+      }
 
     redirect = () => {
         window.location.replace(redirectLocation);
@@ -96,7 +109,7 @@ class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
         let { attendeeCode } = this.state;
         return (
             <div className="container">
-                
+
                 <Row align="middle">
                     <div className="content">
                         <Col>
@@ -112,6 +125,10 @@ class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
                                         </Form.Item>
                                         <Form.Item>
                                             <Button type="primary" htmlType="submit" className="login-form-button">Log in</Button>
+                                        </Form.Item>
+                                        
+                                        <Form.Item>
+                                            <Button type='primary' onClick={firebase.auth.doSignInWithGooogle}>Sign in with Google</Button>
                                         </Form.Item>
                                     </Form>
 
@@ -134,6 +151,7 @@ class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
                                         <Form.Item>
                                             <Button type="primary" htmlType="submit" className="login-form-button">Log in</Button>
                                         </Form.Item>
+
                                     </Form>
                                 </TabPane>
 
@@ -142,9 +160,9 @@ class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
                                 (this.props.isLoading) ? <Spin /> : ""
                             }
                         </Col>
-                        </div>
-                    </Row>
-                
+                    </div>
+                </Row>
+
             </div>
         );
     }

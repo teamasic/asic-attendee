@@ -2,6 +2,7 @@ using AttendanceSystemIPCamera.BackgroundServices;
 using AttendanceSystemIPCamera.Framework.AutoMapperProfiles;
 using AttendanceSystemIPCamera.Framework.Database;
 using AttendanceSystemIPCamera.Framework.GlobalStates;
+using AttendanceSystemIPCamera.Framework.MyConfiguration;
 using AttendanceSystemIPCamera.Framework.ViewModels;
 using AttendanceSystemIPCamera.Models;
 using AttendanceSystemIPCamera.Repositories.UnitOfWork;
@@ -22,6 +23,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using System;
 using System.Collections.Generic;
 
 namespace AttendanceSystemIPCamera
@@ -57,8 +59,9 @@ namespace AttendanceSystemIPCamera
             setupSwagger(services);
             SetupUnitConfig(services);
             SetupGlobalStateManager(services);
-
+            SetupAppSettings(services);
         }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -166,5 +169,12 @@ namespace AttendanceSystemIPCamera
             var globalState = new GlobalState();
             services.AddSingleton(globalState);
         }
+
+        private void SetupAppSettings(IServiceCollection services)
+        {
+            var appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>();
+            services.AddSingleton(appSettings);
+        }
+
     }
 }

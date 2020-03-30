@@ -1,9 +1,9 @@
-﻿using System;
+﻿using AttendanceSystemIPCamera.Utils;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AttendanceSystemIPCamera.Services.NetworkService
 {
@@ -16,47 +16,29 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             this.localServer = localServer;
         }
 
-        protected  object Receive(ref IPEndPoint remoteHostIP)
+        protected object Receive(ref IPEndPoint remoteHostIP)
         {
             return localServer.Receive(ref remoteHostIP);
         }
-
-        protected async Task<UdpReceiveResult> ReceiveAsync()
+        protected byte[] Decode(byte[] encodedMessage)
         {
-            return await localServer.ReceiveAsync();
+            return CryptoUtils.Decrypt(encodedMessage);
         }
-
-        protected  object Decode(object encodedMessage) {
-            return encodedMessage;
-        }
-        protected  bool Authenticate(object decodedMessage)
-        {
-            return true;
-        }
+        //protected  bool Authenticate(object decodedMessage)
+        //{
+        //    return true;
+        //}
 
         public object Start(ref IPEndPoint remoteHostIP)
         {
-            var encodedMessage = Encoding.UTF8.GetString(Receive(ref remoteHostIP) as byte[]);
-            var decodedMessage = Decode(encodedMessage);
-            if (Authenticate(decodedMessage))
-            {
-                return decodedMessage;
-            }
-            return null;
+            byte[] encodedMessage = Receive(ref remoteHostIP) as byte[];
+            byte[] decodedMessage = Decode(encodedMessage);
+            //if (Authenticate(decodedMessage))
+            //{
+            //    return decodedMessage;
+            //}
+            return Encoding.UTF8.GetString(decodedMessage);
         }
-
-        //public async Task<object> StartAsync()
-        //{
-        //    var udpReceiveResult = await ReceiveAsync();
-
-        //    var encodedMessage = Encoding.UTF8.GetString(Receive(ref remoteHostIP) as byte[]);
-        //    var decodedMessage = Decode(encodedMessage);
-        //    if (Authenticate(decodedMessage))
-        //    {
-        //        return decodedMessage;
-        //    }
-        //    return null;
-        //}
 
     }
 }

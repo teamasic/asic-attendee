@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AttendeeApp.Handler;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,7 @@ namespace AttendeeWPF
         public MainWindow()
         {
             InitializeComponent();
+            this.Browser.RequestHandler = new CustomRequestHandler();
         }
     }
 }
