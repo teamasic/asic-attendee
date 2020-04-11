@@ -10,8 +10,13 @@ const unloadedState: AttendeeState = {
     attendee: {
         id: 0,
         code: "",
-        name: ""
-    }
+        name: "",
+        email: "",
+        image: "",
+        username: "",
+    },
+    isLogin: false,
+    errors: []
 };
 
 const reducers: Reducer<AttendeeState> = (state: AttendeeState | undefined, incomingAction: AnyAction): AttendeeState => {
@@ -22,23 +27,36 @@ const reducers: Reducer<AttendeeState> = (state: AttendeeState | undefined, inco
     switch (action.type) {
         case ACTIONS.START_REQUEST_LOGIN:
             return {
-                ... state,
+                ...state,
                 isLoading: true,
                 successfullyLoaded: false,
             };
         case ACTIONS.STOP_REQUEST_LOGIN_WITH_ERRORS:
             return {
-                ... state,
+                ...state,
                 isLoading: false,
-                successfullyLoaded: false
+                successfullyLoaded: false,
+                isLogin: false,
+                errors: action.errors
             };
         case ACTIONS.RECEIVE_SUCCESS_LOGIN:
             return {
                 ...state,
                 attendee: action.attendee,
                 isLoading: false,
-                successfullyLoaded: true
+                successfullyLoaded: true,
+                isLogin: true
             };
+        case ACTIONS.USER_INFO_NOT_IN_LOCAL:
+            return {
+                ...state,
+                isLogin: false
+            }
+        case ACTIONS.LOG_OUT:
+            return {
+                ...state,
+                ...unloadedState,
+            }
     }
 
     return state;

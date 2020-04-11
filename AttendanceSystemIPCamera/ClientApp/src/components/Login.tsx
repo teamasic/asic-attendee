@@ -13,6 +13,7 @@ import { loginMethod } from '../constant';
 import { login } from '../services/attendee';
 import * as firebase from '../firebase';
 import UserLogin from '../models/UserLogin';
+import { error, getErrors } from '../utils';
 
 
 // At runtime, Redux will merge together...
@@ -57,15 +58,15 @@ class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
 
     public componentDidMount() {
         firebase.auth.onAuthStateChanged(authUser => {
-          if (authUser) {
-            authUser.getIdToken().then(token => {
-              console.log(token);
-              const credentials = { firebaseToken: token };
-              this.props.requestLoginWithFirebase(credentials, this.redirect);
-            });
-          }
+            if (authUser) {
+                authUser.getIdToken().then(token => {
+                    console.log(token);
+                    const credentials = { firebaseToken: token };
+                    this.props.requestLoginWithFirebase(credentials, this.redirect);
+                });
+            }
         });
-      }
+    }
 
     redirect = () => {
         window.location.replace(redirectLocation);
@@ -114,9 +115,9 @@ class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
                     <div className="content">
                         <Col>
                             <Tabs defaultActiveKey={this.state.loginMethod} onChange={this.handleChangeTab}>
-                                <TabPane tab="Login by username and password" key={loginMethod.lOGIN_BY_ATTENDEE_CODE}>
+                                <TabPane tab="Login with Google" key={loginMethod.lOGIN_BY_ATTENDEE_CODE}>
                                     <Form onSubmit={(e) => this.handleSubmit(e)} className="login-form" layout="horizontal">
-                                        <Form.Item label="Attendee Code">
+                                        {/* <Form.Item label="Attendee Code">
                                             <Input
                                                 prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
                                                 onChange={(e) => this.setState({ attendeeCode: e.target.value })}
@@ -125,16 +126,20 @@ class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
                                         </Form.Item>
                                         <Form.Item>
                                             <Button type="primary" htmlType="submit" className="login-form-button">Log in</Button>
-                                        </Form.Item>
-                                        
+                                        </Form.Item> */}
+
                                         <Form.Item>
                                             <Button type='primary' onClick={firebase.auth.doSignInWithGooogle}>Sign in with Google</Button>
                                         </Form.Item>
                                     </Form>
+                                    {
+                                        this.props.errors.length === 0 ? "" :
+                                            this.renderErrors()
+                                    }
 
                                 </TabPane>
 
-                                <TabPane tab="Login by face" key={loginMethod.LOGIN_BY_FACE}>
+                                {/* <TabPane tab="Login by face" key={loginMethod.LOGIN_BY_FACE}>
 
                                     <Form onSubmit={(e) => this.handleSubmit(e)} className="login-form">
                                         {this.state.webcamEnabled ? <React.Fragment>
@@ -153,7 +158,7 @@ class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
                                         </Form.Item>
 
                                     </Form>
-                                </TabPane>
+                                </TabPane> */}
 
                             </Tabs>
                             {
@@ -167,7 +172,11 @@ class Login extends React.PureComponent<AttendeeProps, LoginComponentState> {
         );
     }
 
-
+    private renderErrors() {
+        firebase.auth.doSignOut().then(() => {
+            error(getErrors(this.props.errors))
+        });
+    }
 }
 
 const matchDispatchToProps = (dispatch: any) => {

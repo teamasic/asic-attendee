@@ -4,30 +4,51 @@ import Layout from './components/Layout';
 import Login from './components/Login';
 
 import './App.css';
-import Dashboard from './components/Dashboard';
-import Session from './components/Session';
 import { constants } from './constant';
 import Record from './components/Record';
+import { connect } from 'react-redux';
+import { ApplicationState } from './store';
+import { AttendeeState } from './store/attendee/attendeeState';
+import { attendeeActionCreators } from './store/attendee/attendeeActionCreators';
+import { bindActionCreators } from 'redux';
 
-export default () => {
-    const authData = localStorage.getItem(constants.AUTH_IN_LOCAL_STORAGE);
-    if (authData) {
-        return (
-            <Layout>
-                <Route exact path='/'>
-                    <Redirect exact to='/record' />
-                </Route>
-                <Route exact path="/record" component={Record} />
-            </Layout>
-        );
-    } else {
-        return (
-            <Layout>
-                <Route exact path="/" component={Login} />
-            </Layout>
-        );
+type AppProps =
+    AttendeeState &
+    typeof attendeeActionCreators;
+
+class AppComponent extends React.Component<AppProps> {
+
+    constructor(props: any) {
+        super(props);
     }
-};
+    public render() {
+        if (!this.props.isLogin) {
+            this.props.checkUserInfo();
+        }
+        if (this.props.isLogin) {
+            console.log(this.props.attendee);
+            return (
+                <Layout>
+                    <Route exact path='/'>
+                        <Redirect exact to='/record' />
+                    </Route>
+                    <Route exact path="/record" component={Record} />
+                </Layout>
+            );
+        } else {
+            return (
+                <Layout>
+                    <Route exact path="/" component={Login} />
+                </Layout>
+            );
+        }
+    }
+}
+const matchDispatchToProps = (dispatch: any) => {
+    return bindActionCreators(attendeeActionCreators, dispatch);
+}
+
+export default connect((state: ApplicationState) => state.attendee, matchDispatchToProps)(AppComponent);
 
 
 

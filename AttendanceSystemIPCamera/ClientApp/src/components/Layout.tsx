@@ -5,10 +5,21 @@ import { Layout, Menu, Breadcrumb, Icon, Divider, Row, Col } from 'antd';
 import '../styles/Layout.css';
 import { constants } from '../constant';
 import * as firebase from '../firebase';
+
+import { AttendeeState } from '../store/attendee/attendeeState';
+import { attendeeActionCreators } from '../store/attendee/attendeeActionCreators';
+import { bindActionCreators } from 'redux';
+import { withRouter } from 'react-router';
+import { connect } from 'react-redux';
+import { ApplicationState } from '../store';
 const { Header, Sider, Content, Footer } = Layout;
 
+type LayoutProps =
+	AttendeeState &
+	typeof attendeeActionCreators;
+
 class PageLayout extends React.Component<
-	any,
+	LayoutProps,
 	{
 		collapsed: boolean;
 	}
@@ -17,14 +28,17 @@ class PageLayout extends React.Component<
 		collapsed: false
 	};
 
+
+	constructor(props: any) {
+		super(props);
+	}
+
 	onCollapse = (collapsed: boolean) => {
 		this.setState({ collapsed });
 	};
 
 	render() {
-		const authData = localStorage.getItem(constants.AUTH_IN_LOCAL_STORAGE);
-		console.log(authData);
-		return (<div>{authData ? this.renderLayout() : this.renderEmty()}</div>);
+		return (<>{this.props.isLogin ? this.renderLayout() : this.renderEmty()}</>);
 	}
 	private renderLayout() {
 		return (
@@ -72,9 +86,9 @@ class PageLayout extends React.Component<
 		);
 	}
 
-	private logout(){
+	private logout() {
 		const authData = localStorage.getItem(constants.AUTH_IN_LOCAL_STORAGE);
-		if(authData != null){
+		if (authData != null) {
 			firebase.auth.doSignOut();
 			localStorage.removeItem(constants.AUTH_IN_LOCAL_STORAGE);
 			window.location.href = "/";
@@ -82,4 +96,11 @@ class PageLayout extends React.Component<
 	}
 }
 
-export default PageLayout;
+export default withRouter(connect(
+	(state: ApplicationState) => ({
+		...state.attendee
+	}), // Selects which state properties are merged into the component's props
+	dispatch => bindActionCreators({
+		...attendeeActionCreators
+	}, dispatch) // Selects which action creators are merged into the component's props
+)(PageLayout as any));

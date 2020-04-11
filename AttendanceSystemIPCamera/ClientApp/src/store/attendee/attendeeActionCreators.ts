@@ -11,8 +11,9 @@ import UserLogin from "../../models/UserLogin";
 export const ACTIONS = {
     START_REQUEST_LOGIN:"START_REQUEST_LOGIN",
     STOP_REQUEST_LOGIN_WITH_ERRORS:"STOP_REQUEST_LOGIN_WITH_ERRORS",
-    RECEIVE_SUCCESS_LOGIN:"RECEIVE_SUCCESS_LOGIN"
-
+    RECEIVE_SUCCESS_LOGIN:"RECEIVE_SUCCESS_LOGIN",
+    USER_INFO_NOT_IN_LOCAL: "USER_INFO_NOT_IN_LOCAL",
+    LOG_OUT: "LOG_OUT"
 }
 
 function startRequestLogin() {
@@ -34,6 +35,27 @@ function receiveSuccessLogin(attendee:Attendee) {
         attendee
     };
 }
+
+function checkUserInfo() {
+    const authData = localStorage.getItem(constants.AUTH_IN_LOCAL_STORAGE);
+    if (authData) {
+        const attendee = JSON.parse(authData);
+        return {
+            type: ACTIONS.RECEIVE_SUCCESS_LOGIN,
+            attendee
+        }
+    }
+    return {
+        type: ACTIONS.USER_INFO_NOT_IN_LOCAL
+    }
+}
+
+function logout(){
+    return {
+        type: ACTIONS.LOG_OUT
+    }
+}
+
 
 const requestLogin = (attendeeLogin: AttendeeLogin, redirect: Function): AppThunkAction => async (dispatch, getState) => {
     dispatch(startRequestLogin());
@@ -66,5 +88,7 @@ const requestLoginWithFirebase = (userLogin: UserLogin, redirect: Function): App
 
 export const attendeeActionCreators = {
     requestLogin,
-    requestLoginWithFirebase
+    requestLoginWithFirebase,
+    checkUserInfo: checkUserInfo,
+    logout: logout,
 };

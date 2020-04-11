@@ -27,11 +27,14 @@ import ChangeRequestModal from './ChangeRequestModal';
 import classNames from 'classnames';
 import ChangeRequestModalSummary from './ChangeRequestModalSummary';
 import { MinusCircleOutline } from '@ant-design/icons';
+import { AttendeeState } from '../store/attendee/attendeeState';
+import { error, getErrors } from '../utils';
 
 // At runtime, Redux will merge together...
 type RecordProps =
     RecordState // ... state we've requested from the Redux store
     & UnitsState
+    & AttendeeState
     & typeof unitActionCreators
     & typeof recordActionCreators // ... plus action creators we've requested
     & RouteComponentProps<{}>; // ... plus incoming routing parameters
@@ -90,6 +93,8 @@ class RecordComp extends React.PureComponent<RecordProps, RecordComponentState> 
         return (
             (this.props.isLoading) ? <Spin /> :
                 <>
+                    {this.props.errorsInRecordState.length === 0 ? "" :
+                        this.renderErrors(this.props.errorsInRecordState)}
                     <Button.Group>
                         <Button type="primary" onClick={(e) => this.handleRefresh()}>
                             <Icon type="sync" />
@@ -216,7 +221,7 @@ class RecordComp extends React.PureComponent<RecordProps, RecordComponentState> 
 
     private getUnitLabel(unit: Unit) {
         return {
-            id:-1,
+            id: -1,
             text: unit.name + " (" + moment(unit.startTime).format("HH:mm") + " - " + moment(unit.endTime).format("HH:mm") + ")"
         };
     }
@@ -253,8 +258,7 @@ class RecordComp extends React.PureComponent<RecordProps, RecordComponentState> 
                 </>
             };
         }
-        if(cell != undefined && cell.id == -1)
-        {
+        if (cell != undefined && cell.id == -1) {
             return {
                 children: <>
                     <div>{cell.text}</div>
@@ -294,6 +298,10 @@ class RecordComp extends React.PureComponent<RecordProps, RecordComponentState> 
         };
     }
 
+    private renderErrors(errors: any[]) {
+        error(getErrors(errors));
+    }
+
 
 }
 
@@ -303,7 +311,7 @@ const mapDispatchToProps = (dispatch: any) => {
 }
 
 const mapStateToProps = (state: ApplicationState) => {
-    return { ...state.record, ...state.units };
+    return { ...state.record, ...state.units, ...state.attendee };
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(RecordComp);

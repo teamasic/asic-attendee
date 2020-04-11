@@ -6,4 +6,5 @@ export interface RecordState {
     successfullyLoaded: boolean;
     recordSearch: RecordSearch;
     recordData: Record[];
+    errorsInRecordState: any[]
 }
