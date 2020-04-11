@@ -8,6 +8,9 @@
     <SpaRoot>ClientApp\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <PackageId>Attendee</PackageId>
+    <Authors>ASIC</Authors>
+    <Product>AttendanceSystemIPCamera_Attendee</Product>
   </PropertyGroup>
 
   <ItemGroup>

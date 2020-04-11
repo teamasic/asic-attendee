@@ -21,7 +21,7 @@ namespace AttendanceSystemIPCamera.Services.GroupService
 {
     public interface IAttendeeService : IBaseService<Attendee>
     {
-        Task<AttendeeViewModel> AddAttendeeWithGroupsIfNotInDb(string attendeeCode, string name, List<int> groupIds);
+        Task<AttendeeViewModel> AddAttendeeWithGroupsIfNotInDb(string attendeeCode, string name, string avatar = "", List<int> groupIds = null);
         Task<AttendeeViewModel> Login(LoginViewModel loginViewModel);
         Attendee GetByIdWithAttendeeGroups(int attendeeId);
         Task<AttendeeViewModel> LoginWithFirebase(UserAuthentication userAuthentication);
@@ -38,7 +38,7 @@ namespace AttendanceSystemIPCamera.Services.GroupService
             this.appSettings = unitOfWork.AppSettings;
         }
 
-        public async Task<AttendeeViewModel> AddAttendeeWithGroupsIfNotInDb(string attendeeCode, string name,
+        public async Task<AttendeeViewModel> AddAttendeeWithGroupsIfNotInDb(string attendeeCode, string name, string avatar,
                                                                                 List<int> groupIds = null)
         {
             var attendee = attendeeRepository.GetByCodeWithAttendeeGroups(attendeeCode);
@@ -48,6 +48,7 @@ namespace AttendanceSystemIPCamera.Services.GroupService
                 {
                     Code = attendeeCode,
                     Name = name,
+                    Avatar = avatar
                 };
                 await this.Add(attendee);
             }
@@ -121,7 +122,7 @@ namespace AttendanceSystemIPCamera.Services.GroupService
             //check attendee in local app
             var attendee =
                 await this.AddAttendeeWithGroupsIfNotInDb
-                (authorizedUser.User.RollNumber, authorizedUser.User.Fullname);
+                (authorizedUser.User.RollNumber, authorizedUser.User.Fullname, authorizedUser.User.Image);
 
             //var accessTokenViewModel = new AccessToken()
             //{

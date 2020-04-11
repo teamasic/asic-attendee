@@ -20,7 +20,8 @@ const unloadedState: RecordState = {
         startTime: new Date(),
         endTime: new Date(),
         present: false
-    }]
+    }],
+    errorsInRecordState:[]
 };
 
 const reducers: Reducer<RecordState> = (state: RecordState | undefined, incomingAction: AnyAction): RecordState => {
@@ -40,7 +41,8 @@ const reducers: Reducer<RecordState> = (state: RecordState | undefined, incoming
             return {
                 ...state,
                 isLoading: false,
-                successfullyLoaded: false
+                successfullyLoaded: false,
+                errorsInRecordState: action.errors
             };
         case ACTIONS.RECEIVE_RECORDS_DATA:
             return {

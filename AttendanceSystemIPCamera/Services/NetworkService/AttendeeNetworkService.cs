@@ -174,7 +174,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
                     var savedGroups = await groupService.AddGroupIfNotInDbAsync(groupVMs);
                     var groupIds = savedGroups.Select(g => g.Id).ToList();
                     //
-                    attendee = await attendeeService.AddAttendeeWithGroupsIfNotInDb(attendanceInfo.AttendeeCode, attendanceInfo.AttendeeName, groupIds);
+                    attendee = await attendeeService.AddAttendeeWithGroupsIfNotInDb(attendanceInfo.AttendeeCode, attendanceInfo.AttendeeName, "", groupIds);
                     //
                     var sessionNetworkVms = new List<SessionNetworkViewModel>();
                     attendanceInfo.Groups.ForEach(group =>
