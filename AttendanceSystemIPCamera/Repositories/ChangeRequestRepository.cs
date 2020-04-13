@@ -16,6 +16,7 @@ namespace AttendanceSystemIPCamera.Repositories
     {
         public Task<IEnumerable<ChangeRequest>> GetAll(SearchChangeRequestViewModel viewModel);
         public Task<ChangeRequest> GetByIdSimple(object id);
+        List<ChangeRequest> GetByRecordIds(List<int> recordIds);
     }
     public class ChangeRequestRepository : Repository<ChangeRequest>, IChangeRequestRepository
     {
@@ -34,7 +35,7 @@ namespace AttendanceSystemIPCamera.Repositories
         {
             return await dbSet
                 .Include(cr => cr.Record)
-                    .ThenInclude(r => r.Attendee)
+                    .ThenInclude(r => r.AttendeeGroup.Attendee)
                 .Include(cr => cr.Record)
                    .ThenInclude(r => r.Session)
                         .ThenInclude(s => s.Group)
@@ -58,11 +59,16 @@ namespace AttendanceSystemIPCamera.Repositories
             }
             return dbSet
                 .Include(cr => cr.Record)
-                    .ThenInclude(r => r.Attendee)
+                    .ThenInclude(r => r.AttendeeGroup.Attendee)
                 .Include(cr => cr.Record)
                     .ThenInclude(r => r.Session)
                         .ThenInclude(s => s.Group)
                 .Where(filterStatus);
+        }
+    
+        public List<ChangeRequest> GetByRecordIds(List<int> recordIds)
+        {
+            return Get(c => recordIds.Contains(c.RecordId)).ToList();
         }
     }
 }

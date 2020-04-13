@@ -10,14 +10,20 @@ namespace AttendanceSystemIPCamera.Framework.ViewModels
 {
     public class RecordViewModel : BaseViewModel<Record>
     {
-        public int AttendeeId { get; set; }
+        public string AttendeeCode { get; set; }
+        public string SessionName { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public DateTime UpdateTime { get; set; }
         public bool Present { get; set; }
-        public ChangeRequestViewModel ChangeRequest {get; set;}
+        public int SessionId { get; set; }
+        public int AttendeeGroupId { get; set; }
+        public ChangeRequestViewModel ChangeRequest { get; set; }
     }
     public class RecordSimpleViewModel : BaseViewModel<Record>
     {
         public int Id { get; set; }
-        public AttendeeViewModel Attendee { get; set; }
+        public AttendeeGroupViewModel AttendeeGroup { get; set; }
         public SessionViewModel Session { get; set; }
         public bool Present { get; set; }
     }
@@ -36,9 +42,11 @@ namespace AttendanceSystemIPCamera.Framework.ViewModels
 
     public class RecordNetworkViewModel : BaseViewModel<Record>
     {
-        [JsonIgnore]
-        public int AttendeeId { get; set; }
+        public int Id { get; set; }
+        public int AttendeeGroupId { get; set; }
         public bool Present { get; set; }
+        public int SessionId { get; set; }
+        public DateTime UpdateTime { get; set; }
         public ChangeRequestNetworkViewModel ChangeRequest { get; set; }
     }
 

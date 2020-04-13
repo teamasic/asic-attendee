@@ -16,14 +16,14 @@ using AttendanceSystemIPCamera.Utils;
 using AttendanceSystemIPCamera.Framework;
 using static AttendanceSystemIPCamera.Framework.Constants;
 using AttendanceSystemIPCamera.Framework.MyConfiguration;
+using AttendanceSystemIPCamera.Services.NetworkService;
 
-namespace AttendanceSystemIPCamera.Services.GroupService
+namespace AttendanceSystemIPCamera.Services.AttendeeService
 {
     public interface IAttendeeService : IBaseService<Attendee>
     {
-        Task<AttendeeViewModel> AddAttendeeWithGroupsIfNotInDb(string attendeeCode, string name, string avatar = "", List<int> groupIds = null);
-        Task<AttendeeViewModel> Login(LoginViewModel loginViewModel);
-        Attendee GetByIdWithAttendeeGroups(int attendeeId);
+        Task<AttendeeViewModel> AddAttendeeWithGroupsIfNotInDb(string attendeeCode, string name, 
+                string avatar = "", List<string> groupCodes = null);
         Task<AttendeeViewModel> LoginWithFirebase(UserAuthentication userAuthentication);
     }
 
@@ -32,15 +32,21 @@ namespace AttendanceSystemIPCamera.Services.GroupService
         private readonly IAttendeeRepository attendeeRepository;
         private readonly AppSettings appSettings;
 
-        public AttendeeService(MyUnitOfWork unitOfWork) : base(unitOfWork)
+
+        private readonly IMapper mapper;
+
+        public AttendeeService(MyUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork)
         {
             this.attendeeRepository = unitOfWork.AttendeeRepository;
             this.appSettings = unitOfWork.AppSettings;
+
+            this.mapper = mapper;
         }
 
         public async Task<AttendeeViewModel> AddAttendeeWithGroupsIfNotInDb(string attendeeCode, string name, string avatar,
-                                                                                List<int> groupIds = null)
+                                                                                List<string> groupCodes = null)
         {
+            //add attendee if not exist
             var attendee = attendeeRepository.GetByCodeWithAttendeeGroups(attendeeCode);
             if (attendee == null)
             {
@@ -53,55 +59,25 @@ namespace AttendanceSystemIPCamera.Services.GroupService
                 await this.Add(attendee);
             }
 
-            var attendedGroupIds = attendee.AttendeeGroups.Select(ag => ag.GroupId).ToList();
-            if (groupIds != null && groupIds.Count > 0)
+            //add attendee group if not exist
+            var attendedGroupCodes = attendee.AttendeeGroups.Select(ag => ag.GroupCode).ToList();
+            if (groupCodes != null && groupCodes.Count > 0)
             {
-                groupIds.ForEach(gId =>
+                groupCodes.ForEach(gCode =>
                 {
-                    if (!attendedGroupIds.Contains(gId))
+                    if (!attendedGroupCodes.Contains(gCode))
                     {
                         var attGr = new AttendeeGroup()
                         {
-                            AttendeeId = attendee.Id,
-                            GroupId = gId
+                            GroupCode = gCode,
+                            AttendeeCode = attendee.Code
                         };
                         attendee.AttendeeGroups.Add(attGr);
                     }
                 });
             }
             unitOfWork.Commit();
-            return new AttendeeViewModel()
-            {
-                Id = attendee.Id,
-                Code = attendee.Code,
-                Name = attendee.Name
-            };
-        }
-
-        public async Task<AttendeeViewModel> Login(LoginViewModel loginViewModel)
-        {
-            //IPAddress localIp = null;
-            //IPAddress.TryParse(NetworkUtils.GetLocalIPAddress(), out localIp);
-            //if (localIp != null)
-            //{
-            //    var networkRequest = new NetworkRequest<LoginViewModel>()
-            //    {
-            //        IPAddress = localIp.ToString(),
-            //        Route = NetworkRoute.LOGIN,
-            //        Request = loginViewModel
-            //    };
-            //    var attendee = await unitOfWork.AttendeeNetworkService.Start(networkRequest);
-            //    if (attendee != null) return attendee;
-            //    throw new BaseException(ErrorMessage.LOGIN_FAIL);
-            //}
-            //else throw new BaseException(ErrorMessage.CANNOT_GET_LOCAL_IP_ADDRESS);
-
-            return await unitOfWork.AttendeeNetworkService.Login(loginViewModel);
-        }
-
-        public Attendee GetByIdWithAttendeeGroups(int attendeeId)
-        {
-            return attendeeRepository.GetByIdWithAttendeeGroups(attendeeId);
+            return mapper.Map<AttendeeViewModel>(attendee);
         }
 
         public async Task<AttendeeViewModel> LoginWithFirebase(UserAuthentication userAuthentication)
@@ -122,7 +98,7 @@ namespace AttendanceSystemIPCamera.Services.GroupService
             //check attendee in local app
             var attendee =
                 await this.AddAttendeeWithGroupsIfNotInDb
-                (authorizedUser.User.RollNumber, authorizedUser.User.Fullname, authorizedUser.User.Image);
+                (authorizedUser.User.Code, authorizedUser.User.Name, authorizedUser.User.Image);
 
             //var accessTokenViewModel = new AccessToken()
             //{

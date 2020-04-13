@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AttendanceSystemIPCamera.Framework;
 using AttendanceSystemIPCamera.Framework.ViewModels;
 using AttendanceSystemIPCamera.Models;
+using AttendanceSystemIPCamera.Services.AttendeeService;
 using AttendanceSystemIPCamera.Services.GroupService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -21,14 +22,6 @@ namespace AttendanceSystemIPCamera.Controllers
             this.service = service;
         }
 
-        [HttpPost("login")]
-        public async Task<dynamic> Login(LoginViewModel loginViewModel)
-        {
-            return await ExecuteInMonitoring(async () =>
-           {
-               return await service.Login(loginViewModel);
-           });
-        }
 
         [HttpPost("login/firebase")]
         public async Task<dynamic> LoginWithFirebase(UserAuthentication userAuthen)

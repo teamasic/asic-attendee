@@ -18,12 +18,15 @@ using System.Linq;
 using AttendanceSystemIPCamera.Framework;
 using System.Threading;
 using static AttendanceSystemIPCamera.Framework.Constants;
+using AttendanceSystemIPCamera.Services.RecordService;
+using AttendanceSystemIPCamera.Services.ChangeRequestService;
+using AttendanceSystemIPCamera.Services.AttendanceService;
 
 namespace AttendanceSystemIPCamera.Services.NetworkService
 {
     public interface IAttendeeNetworkService
     {
-        Task<AttendeeViewModel> Login(LoginViewModel loginViewModel);
+        Task<AttendeeViewModel> Refresh(LoginViewModel loginViewModel);
         public Task<ChangeRequestSimpleViewModel> CreateChangeRequest(CreateChangeRequestViewModel viewModel);
     }
 
@@ -35,48 +38,39 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
         { get => NetworkUtils.SupervisorAddress; set => NetworkUtils.SupervisorAddress = value; }
 
         private MyUnitOfWork unitOfWork;
-        private ISessionService sessionService;
-        private IAttendeeService attendeeService;
-        private IGroupService groupService;
-        private IMapper mapper;
+        private IAttendanceService attendanceService;
 
         private const int MAX_TRY_TIMES = 2;
         private const int TIME_OUT = 20 * 1000;
 
         private Communicator communicator;
 
-        public AttendeeNetworkService(MyUnitOfWork unitOfWork)
+        public AttendeeNetworkService(MyUnitOfWork unitOfWork, IAttendanceService attendanceService)
         {
             this.unitOfWork = unitOfWork;
-            this.sessionService = unitOfWork.SessionService;
-            this.attendeeService = unitOfWork.AttendeeService;
-            this.groupService = unitOfWork.GroupService;
-            this.mapper = AutoMapperConfiguration.GetInstance();
+            this.attendanceService = attendanceService;
         }
 
-        public async Task<AttendeeViewModel> Login(LoginViewModel loginViewModel)
+        public async Task<AttendeeViewModel> Refresh(LoginViewModel loginViewModel)
         {
-            var networkRequest = GetNetworkRequest(NetworkRoute.LOGIN, loginViewModel);
+            //prepare request
+            var networkRequest = GetNetworkRequest(NetworkRoute.REFRESH_ATTENDANCE_DATA, loginViewModel);
 
             string reqMess = JsonConvert.SerializeObject(networkRequest);
+            //send request
             object responseData = await SendRequest(reqMess);
             if (responseData == null)
             {
                 throw new BaseException(ErrorMessage.NETWORK_ERROR);
             }
-            var attendee = await ProcessLoginResponse(responseData);
-
-            if (attendee != null) return attendee;
-            throw new BaseException(ErrorMessage.LOGIN_FAIL);
-        }
-
-        private NetworkRequest<object> GetNetworkRequest(string route, object request)
-        {
-            var networkRequest = new NetworkRequest<object>();
-            this.GetLocalIpAddress(ref networkRequest);
-            networkRequest.Route = route;
-            networkRequest.Request = request;
-            return networkRequest;
+            //process response
+            var attendanceInfo = JsonConvert.DeserializeObject<AttendanceNetworkViewModel>(responseData.ToString());
+            if (attendanceInfo != null && attendanceInfo.Success)
+            {
+                var attendee = await attendanceService.SaveAttendanceDataAsync(attendanceInfo);
+                return attendee;
+            }
+            throw new BaseException(ErrorMessage.ATTENDEE_NOT_FOUND);
         }
 
         public async Task<ChangeRequestSimpleViewModel> CreateChangeRequest(CreateChangeRequestViewModel viewModel)
@@ -95,6 +89,15 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
         }
 
 
+        private NetworkRequest<object> GetNetworkRequest(string route, object request)
+        {
+            var networkRequest = new NetworkRequest<object>();
+            this.GetLocalIpAddress(ref networkRequest);
+            networkRequest.Route = route;
+            networkRequest.Request = request;
+            return networkRequest;
+        }
+
         private async Task<object> SendRequest(string message)
         {
             bool isContinue = true;
@@ -107,7 +110,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
                 try
                 {
                     var cts = new CancellationTokenSource();
-                    cts.CancelAfter(TIME_OUT);
+                    cts.CancelAfter(TIME_OUT);//request timeout after TIME_OUT milisec
 
                     var receiveTask = Task.Run(() =>
                     {
@@ -151,65 +154,6 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             return new Communicator(localServer, ref this.remoteHostEP);
         }
 
-        private async Task<AttendeeViewModel> ProcessLoginResponse(object responseData)
-        {
-            //process response
-            var attendanceInfo = JsonConvert.DeserializeObject<AttendanceNetworkViewModel>(responseData.ToString());
-            if (attendanceInfo != null && attendanceInfo.Success)
-            {
-                var attendee = await SaveAttendanceAsync(attendanceInfo);
-                return attendee;
-            }
-            return null;
-        }
-
-        private async Task<AttendeeViewModel> SaveAttendanceAsync(AttendanceNetworkViewModel attendanceInfo)
-        {
-            AttendeeViewModel attendee = null;
-            using (var scope = unitOfWork.CreateTransaction())
-            {
-                try
-                {
-                    var groupVMs = mapper.ProjectTo<GroupNetworkViewModel, GroupViewModel>(attendanceInfo.Groups).ToList();
-                    var savedGroups = await groupService.AddGroupIfNotInDbAsync(groupVMs);
-                    var groupIds = savedGroups.Select(g => g.Id).ToList();
-                    //
-                    attendee = await attendeeService.AddAttendeeWithGroupsIfNotInDb(attendanceInfo.AttendeeCode, attendanceInfo.AttendeeName, "", groupIds);
-                    //
-                    var sessionNetworkVms = new List<SessionNetworkViewModel>();
-                    attendanceInfo.Groups.ForEach(group =>
-                    {
-                        if (group.Sessions != null && group.Sessions.Count > 0)
-                        {
-                            group.Sessions.ForEach(session =>
-                            {
-                                var gId = savedGroups.Where(g => g.Code.Equals(group.Code))
-                                                    .Select(g => g.Id)
-                                                    .FirstOrDefault();
-                                session.GroupId = gId;
-
-                                session.Records.ForEach(record =>
-                                {
-                                    record.AttendeeId = attendee.Id;
-                                });
-                            });
-                            sessionNetworkVms.AddRange(group.Sessions);
-                        }
-
-                    });
-                    var sessionVms = mapper.ProjectTo<SessionNetworkViewModel, SessionViewModel>(sessionNetworkVms)
-                                            .ToList();
-                    await sessionService.AddSessionsWithRecordsAsync(sessionVms, attendee.Id);
-                    scope.Commit();
-                }
-                catch (Exception e)
-                {
-                    scope.Rollback();
-                    throw e;
-                }
-            }
-            return attendee;
-        }
         private void GetLocalIpAddress(ref NetworkRequest<object> networkRequest)
         {
             IPAddress localIp = null;

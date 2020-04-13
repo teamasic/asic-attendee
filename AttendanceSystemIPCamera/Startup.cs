@@ -3,28 +3,24 @@ using AttendanceSystemIPCamera.Framework.AutoMapperProfiles;
 using AttendanceSystemIPCamera.Framework.Database;
 using AttendanceSystemIPCamera.Framework.GlobalStates;
 using AttendanceSystemIPCamera.Framework.MyConfiguration;
-using AttendanceSystemIPCamera.Framework.ViewModels;
-using AttendanceSystemIPCamera.Models;
 using AttendanceSystemIPCamera.Repositories.UnitOfWork;
+using AttendanceSystemIPCamera.Services.AttendanceService;
+using AttendanceSystemIPCamera.Services.AttendeeService;
+using AttendanceSystemIPCamera.Services.ChangeRequestService;
 using AttendanceSystemIPCamera.Services.GroupService;
+using AttendanceSystemIPCamera.Services.NetworkService;
 using AttendanceSystemIPCamera.Services.RecordService;
-using AttendanceSystemIPCamera.Services.RoomService;
 using AttendanceSystemIPCamera.Services.SessionService;
 using AttendanceSystemIPCamera.Services.UnitService;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
 
 namespace AttendanceSystemIPCamera
 {
@@ -146,11 +142,13 @@ namespace AttendanceSystemIPCamera
             services.AddScoped<DbContext, MainDbContext>();
             services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IAttendeeService, AttendeeService>();
+            services.AddScoped<IAttendanceService, AttendanceService>();
             services.AddScoped<IRecordService, RecordService>();
             services.AddScoped<ISessionService, SessionService>();
             services.AddScoped<IChangeRequestService, ChangeRequestService>();
+            services.AddScoped<IAttendeeNetworkService, AttendeeNetworkService>();
+            services.AddScoped< UnitService>();
             services.AddScoped<MyUnitOfWork>();
-            services.AddScoped<GroupValidation>();
         }
 
         private void SetupBackgroundService(IServiceCollection services)

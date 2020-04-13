@@ -15,8 +15,7 @@ namespace AttendanceSystemIPCamera.Repositories
 {
     public interface ISessionRepository: IRepository<Session>
     {
-        List<Session> GetByStartTimesAndGroupId(List<DateTime> startTimes, int groupId);
-        List<Session> GetBySearchVM(SessionSearchViewModel searchVM);
+        List<Session> GetByStartTimesAndGroupCode(List<DateTime> startTimes, string groupCode);
 
     }
     public class SessionRepository : Repository<Session>, ISessionRepository
@@ -24,27 +23,12 @@ namespace AttendanceSystemIPCamera.Repositories
         public SessionRepository(DbContext context) : base(context)
         {
         }
-
-        public List<Session> GetBySearchVM(SessionSearchViewModel search)
+        public List<Session> GetByStartTimesAndGroupCode(List<DateTime> startTimes, string groupCode)
         {
-            var sessions = dbSet.Where(r => r.StartTime > search.StartTime
-                                                                && r.EndTime < search.EndTime)
-                .Where(s => s.Records.Any(r => r.AttendeeId == search.AttendeeId));
-            if(search.GroupIds != null && search.GroupIds.Count > 0)
-            {
-                
-                sessions = sessions.Where(s => search.GroupIds.Contains(s.GroupId))
-                    .Include(s=>s.Group);
-            }
-            return sessions.ToList();
-        }
-
-        public List<Session> GetByStartTimesAndGroupId(List<DateTime> startTimes, int groupId)
-        {
-            return dbSet.Where(s => s.Group.Id == groupId)
+            return dbSet.Where(s => s.GroupCode == groupCode)
                 .Where(s => startTimes.Contains(s.StartTime))
-                .Include(s => s.Records)
-                    .ThenInclude(r => r.ChangeRequest)
+                //.Include(s => s.Records)
+                //    .ThenInclude(r => r.ChangeRequest)
                 .ToList();
         }
     }

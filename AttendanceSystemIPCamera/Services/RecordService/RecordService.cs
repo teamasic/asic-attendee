@@ -5,11 +5,15 @@ using AttendanceSystemIPCamera.Repositories;
 using AttendanceSystemIPCamera.Repositories.UnitOfWork;
 using AttendanceSystemIPCamera.Services.BaseService;
 using AttendanceSystemIPCamera.Services.GroupService;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static AttendanceSystemIPCamera.Framework.Constants;
+using AttendanceSystemIPCamera.Framework.AutoMapperProfiles;
+using AttendanceSystemIPCamera.Services.AttendeeService;
+using AttendanceSystemIPCamera.Services.NetworkService;
 
 namespace AttendanceSystemIPCamera.Services.RecordService
 {
@@ -17,27 +21,35 @@ namespace AttendanceSystemIPCamera.Services.RecordService
     {
         List<RecordAttendanceViewModel> GetRecord(SessionSearchViewModel searchViewModel);
         Task<List<RecordAttendanceViewModel>> Refresh(SessionSearchViewModel searchViewModel);
+        Task<List<Record>> AddOrUpdateRecords(List<RecordViewModel> recordVms);
     }
     public class RecordService : BaseService<Record>, IRecordService
     {
         private IRecordRepository recordRepository;
+        private IAttendeeRepository attendeeRepository;
 
-        private IAttendeeService attendeeService;
+        private IAttendeeNetworkService attendeeNetworkService;
+        private IMapper mapper;
 
 
-        public RecordService(MyUnitOfWork unitOfWork) : base(unitOfWork)
+        public RecordService(MyUnitOfWork unitOfWork, IAttendeeNetworkService attendeeNetworkService, IMapper mapper) : base(unitOfWork)
         {
             this.recordRepository = unitOfWork.RecordRepository;
-            this.attendeeService = unitOfWork.AttendeeService;
+            this.attendeeRepository = unitOfWork.AttendeeRepository;
+
+            this.attendeeNetworkService = attendeeNetworkService;
+
+            this.mapper = mapper;
         }
 
         public List<RecordAttendanceViewModel> GetRecord(SessionSearchViewModel searchViewModel)
         {
-            var attendee = attendeeService.GetById(searchViewModel.AttendeeId);
+            var attendee = attendeeRepository.GetById(searchViewModel.AttendeeCode);
             if (attendee != null)
             {
                 List<Record> records = recordRepository.GetByRecordSearch(searchViewModel);
-                var recordAttendanceViewModel = records.Select(r => {
+                var recordAttendanceViewModel = records.Select(r =>
+                {
                     var rec = new RecordAttendanceViewModel()
                     {
                         Id = r.Id,
@@ -66,16 +78,58 @@ namespace AttendanceSystemIPCamera.Services.RecordService
             throw new BaseException(ErrorMessage.ATTENDEE_NOT_FOUND);
         }
 
-
         public async Task<List<RecordAttendanceViewModel>> Refresh(SessionSearchViewModel searchViewModel)
         {
-            var attendee = await attendeeService.GetById(searchViewModel.AttendeeId);
-            await attendeeService.Login(new LoginViewModel()
+            var attendee = await attendeeRepository.GetById(searchViewModel.AttendeeCode);
+            await attendeeNetworkService.Refresh(new LoginViewModel()
             {
                 AttendeeCode = attendee.Code,
                 LoginMethod = Constant.GET_DATA_BY_ATTENDEE_CODE
             });
             return GetRecord(searchViewModel);
+        }
+
+        public async Task<List<Record>> AddOrUpdateRecords(List<RecordViewModel> recordVms)
+        {
+            var recordsReturn = new List<Record>();
+            //This attendeeGroupId is in local database since we assigned to
+            var attendeeGroupIds = recordVms.Select(r => r.AttendeeGroupId).ToList();
+            foreach (var attendeeGroupId in attendeeGroupIds)
+            {
+                //This sessionIds is in local database since we assigned to
+                var sessionIds = recordVms.Where(r => r.AttendeeGroupId == attendeeGroupId)
+                                            .Select(r => r.SessionId)
+                                            .ToList();
+                var recordsInDb = recordRepository.GetByAttendeeGroupIdAndSessionIds(attendeeGroupId, sessionIds);
+                var sessionsInDb = recordsInDb.Select(r => r.SessionId).ToList();
+                var recordsNotInDb = recordVms.Where(r => r.AttendeeGroupId == attendeeGroupId)
+                                              .Where(r => !sessionsInDb.Contains(r.SessionId))
+                                              .ToList();
+
+                //add not exist records
+                if (recordsNotInDb != null && recordsNotInDb.Count > 0)
+                {
+                    var records = mapper.ProjectTo<RecordViewModel, Record>(recordsNotInDb);
+                    await recordRepository.Add(records);
+                    recordsReturn.AddRange(records);
+                }
+
+                //update exist records
+                if (recordsInDb != null && recordsInDb.Count > 0)
+                {
+                    recordsInDb.ForEach(recordInDb =>
+                    {
+                        var recordVm = recordVms.Where(r => r.AttendeeGroupId == attendeeGroupId)
+                                                .Where(r => r.SessionId == recordInDb.SessionId)
+                                                .First();
+                        recordInDb.Present = recordVm.Present;
+                        recordInDb.UpdateTime = recordVm.UpdateTime;
+                    });
+                    recordsReturn.AddRange(recordsInDb);
+                }
+            }
+            unitOfWork.Commit();
+            return recordsReturn;
         }
 
     }

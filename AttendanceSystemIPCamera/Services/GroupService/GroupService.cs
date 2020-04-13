@@ -18,8 +18,7 @@ namespace AttendanceSystemIPCamera.Services.GroupService
 {
     public interface IGroupService : IBaseService<Group>
     {
-        public Task<PaginatedList<Group>> GetAll(GroupSearchViewModel groupSearchViewModel);
-        Task<List<GroupViewModel>> AddGroupIfNotInDbAsync(List<GroupViewModel> groupViewModel);
+        Task<List<Group>> AssignAttendeeToGroups(List<GroupViewModel> groupViewModel, string attendeeCode);
     }
 
     public class GroupService : BaseService<Group>, IGroupService
@@ -34,19 +33,13 @@ namespace AttendanceSystemIPCamera.Services.GroupService
             mapper = AutoMapperConfiguration.GetInstance();
         }
 
-        public async Task<PaginatedList<Group>> GetAll(GroupSearchViewModel groupSearchViewModel)
-        {
-            return await groupRepository.GetAll(groupSearchViewModel);
-        }
-
-        public async Task<List<GroupViewModel>> AddGroupIfNotInDbAsync(List<GroupViewModel> groupViewModel)
+        private async Task<List<Group>> AddGroupIfNotInDbAsync(List<GroupViewModel> groupVMs)
         {
             List<Group> groupsReturn = new List<Group>();
 
-            var groupCodes = groupViewModel.Select(gvm => gvm.Code).ToList();
-            var groupsInDb = groupRepository.GetByGroupCodes(groupCodes);
+            var groupCodes = groupVMs.Select(gvm => gvm.Code).ToList();
+            var groupsInDb = groupRepository.GetByGroupCodesWithAttendeeGroups(groupCodes);
             var groupCodesInDb = groupsInDb.Select(g => g.Code).ToList();
-            //var groupCodesInDb = groupRepository.GetGroupCodesContainsInList(groupCodes);
             var groupCodesNotInDb = groupCodes.Where(gc => !groupCodesInDb.Contains(gc)).ToList();
             groupsReturn.AddRange(groupsInDb);
 
@@ -55,7 +48,7 @@ namespace AttendanceSystemIPCamera.Services.GroupService
                 var groupsNotInDb = groupCodesNotInDb.Select(gc => new Group()
                 {
                     Code = gc,
-                    Name = groupViewModel.FirstOrDefault(a => a.Code.Equals(gc))?.Name,
+                    Name = groupVMs.FirstOrDefault(a => a.Code.Equals(gc))?.Name,
                     Deleted = false,
                     DateTimeCreated = DateTime.UtcNow,
                 }).ToList();
@@ -64,7 +57,22 @@ namespace AttendanceSystemIPCamera.Services.GroupService
 
                 groupsReturn.AddRange(groupsNotInDb);
             }
-            return mapper.ProjectTo<Group, GroupViewModel>(groupsReturn).ToList();
+            return groupsReturn;
+        }
+
+        public async Task<List<Group>> AssignAttendeeToGroups(List<GroupViewModel> groupVMs, string attendeeCode)
+        {
+            var groups = await AddGroupIfNotInDbAsync(groupVMs);
+            groups.ForEach(g =>
+            {
+                g.AttendeeGroups.Add(new AttendeeGroup()
+                {
+                    AttendeeCode = attendeeCode,
+                    IsActive = true
+                });
+            });
+            unitOfWork.Commit();
+            return groups;
         }
     }
 }

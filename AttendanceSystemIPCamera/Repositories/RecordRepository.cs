@@ -12,6 +12,8 @@ namespace AttendanceSystemIPCamera.Repositories
     {
         List<Record> GetByRecordSearch(SessionSearchViewModel search);
 
+        List<Record> GetByAttendeeGroupIdAndSessionIds(int attendeeGroupId, List<int> sessionIds);
+
     }
     public class RecordRepository : Repository<Record>, IRecordRepository
     {
@@ -21,13 +23,18 @@ namespace AttendanceSystemIPCamera.Repositories
 
         public List<Record> GetByRecordSearch(SessionSearchViewModel search)
         {
-            var records = dbSet.Where(r => r.AttendeeId == search.AttendeeId)
+            var records = dbSet.Where(r => r.AttendeeCode == search.AttendeeCode)
                 .Where(r => r.Session.StartTime > search.StartTime)
                 .Where(r => r.Session.StartTime <= search.EndTime)
                 .Include(r => r.Session.Group)
                 .Include(r => r.ChangeRequest)
                 .ToList();
             return records;
+        }
+
+        public List<Record> GetByAttendeeGroupIdAndSessionIds(int attendeeGroupId, List<int> sessionIds)
+        {
+            return Get(r => r.AttendeeGroupId == attendeeGroupId && sessionIds.Contains(r.SessionId)).ToList();
         }
     }
 }

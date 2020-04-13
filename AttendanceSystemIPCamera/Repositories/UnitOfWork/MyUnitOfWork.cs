@@ -21,7 +21,7 @@ namespace AttendanceSystemIPCamera.Repositories.UnitOfWork
         {
             this.AppSettings = appSettings;
         }
-        public IRepository<T> GetRepository<T>() where T : class, BaseEntity
+        public IRepository<T> GetRepository<T>() where T : class
         {
             return new Repository<T>(DbContext);
         }
@@ -91,75 +91,75 @@ namespace AttendanceSystemIPCamera.Repositories.UnitOfWork
         }
         #endregion
 
-        #region Service
-        private IAttendeeService attendeeService;
-        private IGroupService groupService;
-        private ISessionService sessionService;
-        private IAttendeeNetworkService attendeeNetworkService;
-        private IRecordService recordService;
+        //#region Service
+        //private IAttendeeService attendeeService;
+        //private IGroupService groupService;
+        //private ISessionService sessionService;
+        //private IAttendeeNetworkService attendeeNetworkService;
+        //private IRecordService recordService;
 
-        public IRecordService RecordService
-        {
-            get
-            {
-                if (recordService == null)
-                {
-                    recordService = new RecordService(this);
-                }
-                return recordService;
-            }
-        }
+        //public IRecordService RecordService
+        //{
+        //    get
+        //    {
+        //        if (recordService == null)
+        //        {
+        //            recordService = new RecordService(this);
+        //        }
+        //        return recordService;
+        //    }
+        //}
 
-        public IAttendeeNetworkService AttendeeNetworkService
-        {
-            get
-            {
-                if (attendeeNetworkService == null)
-                {
-                    attendeeNetworkService = new AttendeeNetworkService(this);
-                }
-                return attendeeNetworkService;
-            }
-        }
+        //public IAttendeeNetworkService AttendeeNetworkService
+        //{
+        //    get
+        //    {
+        //        if (attendeeNetworkService == null)
+        //        {
+        //            attendeeNetworkService = new AttendeeNetworkService(this);
+        //        }
+        //        return attendeeNetworkService;
+        //    }
+        //}
 
-        public ISessionService SessionService
-        {
-            get
-            {
-                if (sessionService == null)
-                {
-                    sessionService = new SessionService(this);
-                }
-                return sessionService;
-            }
-        }
+        //public ISessionService SessionService
+        //{
+        //    get
+        //    {
+        //        if (sessionService == null)
+        //        {
+        //            sessionService = new SessionService(this);
+        //        }
+        //        return sessionService;
+        //    }
+        //}
 
-        public IGroupService GroupService
-        {
-            get
-            {
-                if (groupService == null)
-                {
-                    groupService = new GroupService(this);
-                }
-                return groupService;
-            }
-        }
-
-
-        public IAttendeeService AttendeeService
-        {
-            get
-            {
-                if (attendeeService == null)
-                {
-                    attendeeService = new AttendeeService(this);
-                }
-                return attendeeService;
-            }
-        }
+        //public IGroupService GroupService
+        //{
+        //    get
+        //    {
+        //        if (groupService == null)
+        //        {
+        //            groupService = new GroupService(this);
+        //        }
+        //        return groupService;
+        //    }
+        //}
 
 
-        #endregion
+        //public IAttendeeService AttendeeService
+        //{
+        //    get
+        //    {
+        //        if (attendeeService == null)
+        //        {
+        //            attendeeService = new AttendeeService(this);
+        //        }
+        //        return attendeeService;
+        //    }
+        //}
+
+
+        //#endregion
     }
 }
