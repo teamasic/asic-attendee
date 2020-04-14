@@ -21,15 +21,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using static AttendanceSystemIPCamera.Framework.Constants;
 
 namespace AttendanceSystemIPCamera
 {
     public class Startup
     {
-
-        public static readonly ILoggerFactory DefaultLoggerFactory
-                                    = LoggerFactory.Create(builder => { builder.AddConsole(); });
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -60,7 +57,7 @@ namespace AttendanceSystemIPCamera
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -96,6 +93,8 @@ namespace AttendanceSystemIPCamera
                     pattern: "{controller}/{action=Index}/{id?}");
             });
 
+            loggerFactory.AddFile(string.Format($"{Constant.LOG_TEMPLATE}", "{Date}"));
+
             //app.UseSpa(spa =>
             //{
             //    spa.Options.SourcePath = "ClientApp";
@@ -120,7 +119,6 @@ namespace AttendanceSystemIPCamera
             services.AddDbContext<MainDbContext>(options =>
             {
                 options.UseSqlite(Configuration.GetConnectionString("SqliteDB"));
-                options.UseLoggerFactory(DefaultLoggerFactory);
             });
 
         }

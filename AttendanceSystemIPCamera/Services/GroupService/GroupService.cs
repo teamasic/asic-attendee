@@ -24,13 +24,11 @@ namespace AttendanceSystemIPCamera.Services.GroupService
     public class GroupService : BaseService<Group>, IGroupService
     {
         private readonly IGroupRepository groupRepository;
-        private readonly ISessionRepository sessionRepository;
         private IMapper mapper;
         public GroupService(MyUnitOfWork unitOfWork) : base(unitOfWork)
         {
             groupRepository = unitOfWork.GroupRepository;
-            sessionRepository = unitOfWork.SessionRepository;
-            mapper = AutoMapperConfiguration.GetInstance();
+            mapper = unitOfWork.mapper;
         }
 
         private async Task<List<Group>> AddGroupIfNotInDbAsync(List<GroupViewModel> groupVMs)
@@ -60,16 +58,22 @@ namespace AttendanceSystemIPCamera.Services.GroupService
             return groupsReturn;
         }
 
-        public async Task<List<Group>> AssignAttendeeToGroups(List<GroupViewModel> groupVMs, string attendeeCode)
+        public async Task<List<Group>> AssignAttendeeToGroups(List<GroupViewModel> groupVMs, 
+                                                                    string attendeeCode)
         {
             var groups = await AddGroupIfNotInDbAsync(groupVMs);
             groups.ForEach(g =>
             {
-                g.AttendeeGroups.Add(new AttendeeGroup()
+                bool isExist = g.AttendeeGroups.Any(ag => ag.AttendeeCode == attendeeCode
+                                            && ag.GroupCode == g.Code);
+                if (!isExist)
                 {
-                    AttendeeCode = attendeeCode,
-                    IsActive = true
-                });
+                    g.AttendeeGroups.Add(new AttendeeGroup()
+                    {
+                        AttendeeCode = attendeeCode,
+                        IsActive = true
+                    });
+                }
             });
             unitOfWork.Commit();
             return groups;

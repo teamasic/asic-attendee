@@ -38,17 +38,17 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
         { get => NetworkUtils.SupervisorAddress; set => NetworkUtils.SupervisorAddress = value; }
 
         private MyUnitOfWork unitOfWork;
-        private IAttendanceService attendanceService;
+        //private IAttendanceService attendanceService;
 
         private const int MAX_TRY_TIMES = 2;
         private const int TIME_OUT = 20 * 1000;
 
         private Communicator communicator;
 
-        public AttendeeNetworkService(MyUnitOfWork unitOfWork, IAttendanceService attendanceService)
+        public AttendeeNetworkService(MyUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
-            this.attendanceService = attendanceService;
+            //this.attendanceService = unitOfWork.AttendanceService;
         }
 
         public async Task<AttendeeViewModel> Refresh(LoginViewModel loginViewModel)
@@ -67,7 +67,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             var attendanceInfo = JsonConvert.DeserializeObject<AttendanceNetworkViewModel>(responseData.ToString());
             if (attendanceInfo != null && attendanceInfo.Success)
             {
-                var attendee = await attendanceService.SaveAttendanceDataAsync(attendanceInfo);
+                var attendee = await unitOfWork.AttendanceService.SaveAttendanceDataAsync(attendanceInfo);
                 return attendee;
             }
             throw new BaseException(ErrorMessage.ATTENDEE_NOT_FOUND);

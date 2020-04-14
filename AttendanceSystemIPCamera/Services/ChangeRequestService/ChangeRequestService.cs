@@ -32,19 +32,18 @@ namespace AttendanceSystemIPCamera.Services.ChangeRequestService
         private readonly IChangeRequestRepository changeRequestRepository;
         private readonly IRecordRepository recordRepository;
 
-        private readonly IAttendeeNetworkService attendeeNetworkService;
+        //private readonly IAttendeeNetworkService attendeeNetworkService;
 
         private readonly IMapper mapper;
 
-        public ChangeRequestService(MyUnitOfWork unitOfWork, IAttendeeNetworkService attendeeNetworkService, 
-                                IMapper mapper) : base(unitOfWork)
+        public ChangeRequestService(MyUnitOfWork unitOfWork) : base(unitOfWork)
         {
             changeRequestRepository = unitOfWork.ChangeRequestRepository;
             recordRepository = unitOfWork.RecordRepository;
 
-            this.attendeeNetworkService = attendeeNetworkService;
+            //this.attendeeNetworkService = unitOfWork.AttendeeNetworkService;
 
-            this.mapper = mapper;
+            this.mapper = unitOfWork.mapper;
         }
 
         public async Task<ChangeRequest> Add(CreateChangeRequestViewModel viewModel)
@@ -66,7 +65,7 @@ namespace AttendanceSystemIPCamera.Services.ChangeRequestService
             };
             await changeRequestRepository.Add(newRequest);
             unitOfWork.Commit();
-            attendeeNetworkService.CreateChangeRequest(viewModel);
+            unitOfWork.AttendeeNetworkService.CreateChangeRequest(viewModel);
             return newRequest;
         }
 

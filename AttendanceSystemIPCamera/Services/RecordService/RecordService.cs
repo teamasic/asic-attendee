@@ -28,18 +28,18 @@ namespace AttendanceSystemIPCamera.Services.RecordService
         private IRecordRepository recordRepository;
         private IAttendeeRepository attendeeRepository;
 
-        private IAttendeeNetworkService attendeeNetworkService;
+        //private IAttendeeNetworkService attendeeNetworkService;
         private IMapper mapper;
 
 
-        public RecordService(MyUnitOfWork unitOfWork, IAttendeeNetworkService attendeeNetworkService, IMapper mapper) : base(unitOfWork)
+        public RecordService(MyUnitOfWork unitOfWork) : base(unitOfWork)
         {
             this.recordRepository = unitOfWork.RecordRepository;
             this.attendeeRepository = unitOfWork.AttendeeRepository;
 
-            this.attendeeNetworkService = attendeeNetworkService;
+            //this.attendeeNetworkService = unitOfWork.AttendeeNetworkService;
 
-            this.mapper = mapper;
+            this.mapper = unitOfWork.mapper;
         }
 
         public List<RecordAttendanceViewModel> GetRecord(SessionSearchViewModel searchViewModel)
@@ -81,7 +81,7 @@ namespace AttendanceSystemIPCamera.Services.RecordService
         public async Task<List<RecordAttendanceViewModel>> Refresh(SessionSearchViewModel searchViewModel)
         {
             var attendee = await attendeeRepository.GetById(searchViewModel.AttendeeCode);
-            await attendeeNetworkService.Refresh(new LoginViewModel()
+            await unitOfWork.AttendeeNetworkService.Refresh(new LoginViewModel()
             {
                 AttendeeCode = attendee.Code,
                 LoginMethod = Constant.GET_DATA_BY_ATTENDEE_CODE
@@ -101,9 +101,9 @@ namespace AttendanceSystemIPCamera.Services.RecordService
                                             .Select(r => r.SessionId)
                                             .ToList();
                 var recordsInDb = recordRepository.GetByAttendeeGroupIdAndSessionIds(attendeeGroupId, sessionIds);
-                var sessionsInDb = recordsInDb.Select(r => r.SessionId).ToList();
+                var sessionIdsInDb = recordsInDb.Select(r => r.SessionId).ToList();
                 var recordsNotInDb = recordVms.Where(r => r.AttendeeGroupId == attendeeGroupId)
-                                              .Where(r => !sessionsInDb.Contains(r.SessionId))
+                                              .Where(r => !sessionIdsInDb.Contains(r.SessionId))
                                               .ToList();
 
                 //add not exist records

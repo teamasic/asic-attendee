@@ -32,24 +32,22 @@ namespace AttendanceSystemIPCamera.Services.AttendanceService
     public class AttendanceService : IAttendanceService
     {
         private readonly IMapper mapper;
-        private ISessionService sessionService;
-        private IRecordService recordService;
-        private IChangeRequestService changeRequestService;
-        private IGroupService groupService;
+        //private ISessionService sessionService;
+        //private IRecordService recordService;
+        //private IChangeRequestService changeRequestService;
+        //private IGroupService groupService;
         private MyUnitOfWork unitOfWork;
 
-        public AttendanceService(MyUnitOfWork unitOfWork, IMapper mapper, ISessionService sessionService,
-                                        IGroupService groupService,
-                                        IRecordService recordService, IChangeRequestService changeRequestService)
+        public AttendanceService(MyUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
 
-            this.mapper = mapper;
+            this.mapper = unitOfWork.mapper;
 
-            this.sessionService = sessionService;
-            this.groupService = groupService;
-            this.recordService = recordService;
-            this.changeRequestService = changeRequestService;
+            //    this.sessionService = unitOfWork.SessionService;
+            //    this.groupService = unitOfWork.GroupService;
+            //    this.recordService = unitOfWork.RecordService;
+            //    this.changeRequestService = unitOfWork.ChangeRequestService;
         }
 
         public async Task<AttendeeViewModel> SaveAttendanceDataAsync(AttendanceNetworkViewModel attendanceInfo)
@@ -68,7 +66,7 @@ namespace AttendanceSystemIPCamera.Services.AttendanceService
                         DateTimeCreated = g.DateTimeCreated,
                         TotalSession = g.TotalSession
                     }).ToList();
-                    var savedGroups = await groupService.AssignAttendeeToGroups(groupVMs, attendeeCode);
+                    var savedGroups = await unitOfWork.GroupService.AssignAttendeeToGroups(groupVMs, attendeeCode);
 
                     //Get attendeeGroups
                     var savedGroupCodes = savedGroups.Select(g => g.Code).ToList();
@@ -88,7 +86,7 @@ namespace AttendanceSystemIPCamera.Services.AttendanceService
                         Status = s.Status,
                         GroupCode = s.GroupCode
                     }).ToList();
-                    var savedSessions = await sessionService.AddSessionsIfNotInDbAsync(sessionVms);
+                    var savedSessions = await unitOfWork.SessionService.AddSessionsIfNotInDbAsync(sessionVms);
 
                     //save or update records
                     var recordNetworkVms = (from elementList in sessionNetworkVms.Select(s => s.Records)
@@ -113,10 +111,11 @@ namespace AttendanceSystemIPCamera.Services.AttendanceService
                             AttendeeGroupId = savedAttGr.Id
                         };
                     }).ToList();
-                    var savedRecords = await recordService.AddOrUpdateRecords(recordVms);
+                    var savedRecords = await unitOfWork.RecordService.AddOrUpdateRecords(recordVms);
 
                     //save or update change request
-                    var changeRequestNetworkVms = recordNetworkVms.Select(r => r.ChangeRequest);
+                    var changeRequestNetworkVms = recordNetworkVms.Select(r => r.ChangeRequest)
+                                                                  .Where(c => c != null);
                     var changeRequestVms = changeRequestNetworkVms.Select(c =>
                     {
                         //update real recordId
@@ -128,7 +127,7 @@ namespace AttendanceSystemIPCamera.Services.AttendanceService
                             Status = c.Status
                         };
                     }).ToList();
-                    await changeRequestService.AddOrUpdateChangeRequests(changeRequestVms);
+                    await unitOfWork.ChangeRequestService.AddOrUpdateChangeRequests(changeRequestVms);
                     scope.Commit();
                 }
                 catch (Exception e)

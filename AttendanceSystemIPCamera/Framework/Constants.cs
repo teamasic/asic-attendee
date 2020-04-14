@@ -14,6 +14,8 @@ namespace AttendanceSystemIPCamera.Framework
             public const string LOGIN_BY_FACE = "2";
             public const string GET_DATA_BY_ATTENDEE_CODE = "3";
             public const string AES_KEY_PATH = "aes";
+
+            public const string LOG_TEMPLATE = "Logs/attendee-log-{0}.txt";
         }
 
         public class NetworkRoute

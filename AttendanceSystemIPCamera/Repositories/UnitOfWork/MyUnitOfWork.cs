@@ -1,5 +1,8 @@
 ﻿using AttendanceSystemIPCamera.Framework.MyConfiguration;
 using AttendanceSystemIPCamera.Models;
+using AttendanceSystemIPCamera.Services.AttendanceService;
+using AttendanceSystemIPCamera.Services.AttendeeService;
+using AttendanceSystemIPCamera.Services.ChangeRequestService;
 using AttendanceSystemIPCamera.Services.GroupService;
 using AttendanceSystemIPCamera.Services.NetworkService;
 using AttendanceSystemIPCamera.Services.RecordService;
@@ -16,10 +19,13 @@ namespace AttendanceSystemIPCamera.Repositories.UnitOfWork
     public class MyUnitOfWork : UnitOfWork
     {
         public readonly AppSettings AppSettings;
+        public readonly IMapper mapper;
+        
 
-        public MyUnitOfWork(DbContext dbContext, AppSettings appSettings) : base(dbContext)
+        public MyUnitOfWork(DbContext dbContext, AppSettings appSettings, IMapper mapper) : base(dbContext)
         {
             this.AppSettings = appSettings;
+            this.mapper = mapper;
         }
         public IRepository<T> GetRepository<T>() where T : class
         {
@@ -91,75 +97,101 @@ namespace AttendanceSystemIPCamera.Repositories.UnitOfWork
         }
         #endregion
 
-        //#region Service
-        //private IAttendeeService attendeeService;
-        //private IGroupService groupService;
-        //private ISessionService sessionService;
-        //private IAttendeeNetworkService attendeeNetworkService;
-        //private IRecordService recordService;
+        #region Service
+        private IAttendeeService attendeeService;
+        private IGroupService groupService;
+        private ISessionService sessionService;
+        private IAttendeeNetworkService attendeeNetworkService;
+        private IRecordService recordService;
+        private IChangeRequestService changeRequestService;
+        private IAttendanceService attendanceService;
 
-        //public IRecordService RecordService
-        //{
-        //    get
-        //    {
-        //        if (recordService == null)
-        //        {
-        //            recordService = new RecordService(this);
-        //        }
-        //        return recordService;
-        //    }
-        //}
+        public IAttendanceService AttendanceService
+        {
+            get
+            {
+                if (attendanceService == null)
+                {
+                    attendanceService = new AttendanceService(this);
+                }
+                return attendanceService;
+            }
+        }
 
-        //public IAttendeeNetworkService AttendeeNetworkService
-        //{
-        //    get
-        //    {
-        //        if (attendeeNetworkService == null)
-        //        {
-        //            attendeeNetworkService = new AttendeeNetworkService(this);
-        //        }
-        //        return attendeeNetworkService;
-        //    }
-        //}
+        public IChangeRequestService ChangeRequestService
+        {
+            get
+            {
+                if (changeRequestService == null)
+                {
+                    changeRequestService = new ChangeRequestService(this);
+                }
+                return changeRequestService;
+            }
+        }
 
-        //public ISessionService SessionService
-        //{
-        //    get
-        //    {
-        //        if (sessionService == null)
-        //        {
-        //            sessionService = new SessionService(this);
-        //        }
-        //        return sessionService;
-        //    }
-        //}
+        public IRecordService RecordService
+        {
+            get
+            {
+                if (recordService == null)
+                {
+                    recordService = new RecordService(this);
+                }
+                return recordService;
+            }
+        }
 
-        //public IGroupService GroupService
-        //{
-        //    get
-        //    {
-        //        if (groupService == null)
-        //        {
-        //            groupService = new GroupService(this);
-        //        }
-        //        return groupService;
-        //    }
-        //}
+        public IAttendeeNetworkService AttendeeNetworkService
+        {
+            get
+            {
+                if (attendeeNetworkService == null)
+                {
+                    attendeeNetworkService = new AttendeeNetworkService(this);
+                }
+                return attendeeNetworkService;
+            }
+        }
+
+        public ISessionService SessionService
+        {
+            get
+            {
+                if (sessionService == null)
+                {
+                    sessionService = new SessionService(this);
+                }
+                return sessionService;
+            }
+        }
+
+        public IGroupService GroupService
+        {
+            get
+            {
+                if (groupService == null)
+                {
+                    groupService = new GroupService(this);
+                }
+                return groupService;
+            }
+        }
 
 
-        //public IAttendeeService AttendeeService
-        //{
-        //    get
-        //    {
-        //        if (attendeeService == null)
-        //        {
-        //            attendeeService = new AttendeeService(this);
-        //        }
-        //        return attendeeService;
-        //    }
-        //}
+        public IAttendeeService AttendeeService
+        {
+            get
+            {
+                if (attendeeService == null)
+                {
+                    attendeeService = new AttendeeService(this, mapper);
+                }
+                return attendeeService;
+            }
+        }
 
 
-        //#endregion
+        #endregion
     }
 }

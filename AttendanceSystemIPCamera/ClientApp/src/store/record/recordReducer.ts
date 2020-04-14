@@ -8,7 +8,7 @@ const unloadedState: RecordState = {
     isLoading: false,
     successfullyLoaded: false,
     recordSearch: {
-        attendeeId: 0,
+        attendeeCode: "",
         startTime: new Date(),
         endTime: new Date()
     },
@@ -35,7 +35,8 @@ const reducers: Reducer<RecordState> = (state: RecordState | undefined, incoming
                 ...state,
                 isLoading: true,
                 successfullyLoaded: false,
-                recordSearch: action.recordSearch
+                recordSearch: action.recordSearch,
+                errorsInRecordState: []
             };
         case ACTIONS.STOP_REQUEST_RECORDS_WITH_ERRORS:
             return {
@@ -49,7 +50,7 @@ const reducers: Reducer<RecordState> = (state: RecordState | undefined, incoming
                 ...state,
                 isLoading: false,
                 successfullyLoaded: true,
-                recordData: action.records
+                recordData: action.records,
             };
     }
 

@@ -40,7 +40,7 @@ type RecordProps =
     & RouteComponentProps<{}>; // ... plus incoming routing parameters
 
 interface RecordComponentState {
-    attendeeId: number;
+    attendeeCode: string;
     endDate: Date;
     startDate: Date;
     showDate: Date;
@@ -68,7 +68,7 @@ class RecordComp extends React.PureComponent<RecordProps, RecordComponentState> 
         let attendee: Attendee = JSON.parse(attendeeStr ? attendeeStr : "");
 
         this.state = {
-            attendeeId: attendee.id,
+            attendeeCode: attendee.code,
             startDate: moment(this.today).startOf('week').toDate(),
             endDate: moment(this.today).endOf('week').toDate(),
             showDate: this.today,
@@ -146,7 +146,7 @@ class RecordComp extends React.PureComponent<RecordProps, RecordComponentState> 
 
     private getRecordSearch() {
         return {
-            attendeeId: this.state.attendeeId,
+            attendeeCode: this.state.attendeeCode,
             startTime: this.state.startDate,
             endTime: this.state.endDate
         };

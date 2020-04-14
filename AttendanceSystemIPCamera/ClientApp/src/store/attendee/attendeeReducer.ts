@@ -8,12 +8,10 @@ const unloadedState: AttendeeState = {
     isLoading: false,
     successfullyLoaded: false,
     attendee: {
-        id: 0,
         code: "",
         name: "",
         email: "",
         image: "",
-        username: "",
     },
     isLogin: false,
     errors: []
@@ -45,7 +43,8 @@ const reducers: Reducer<AttendeeState> = (state: AttendeeState | undefined, inco
                 attendee: action.attendee,
                 isLoading: false,
                 successfullyLoaded: true,
-                isLogin: true
+                isLogin: true,
+                errors: []
             };
         case ACTIONS.USER_INFO_NOT_IN_LOCAL:
             return {

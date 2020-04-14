@@ -54,7 +54,7 @@ namespace AttendanceSystemIPCamera.Services.AttendeeService
                 {
                     Code = attendeeCode,
                     Name = name,
-                    Avatar = avatar
+                    Image = avatar
                 };
                 await this.Add(attendee);
             }

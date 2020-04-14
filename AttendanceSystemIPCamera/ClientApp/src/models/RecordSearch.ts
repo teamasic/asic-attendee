@@ -1,7 +1,7 @@
 import Attendee from "./Attendee";
 
 export default interface RecordSearch {
-    attendeeId: number;
+    attendeeCode: string;
     startTime: Date;
     endTime: Date;
 }

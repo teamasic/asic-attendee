@@ -10,12 +10,12 @@ namespace AttendanceSystemIPCamera.Framework.Database
 {
     public class MainDbContext: DbContext
     {
-        public DbSet<Attendee> Attendees { get; set; }
-        public DbSet<AttendeeGroup> AttendeeGroups { get; set; }
-        public DbSet<Group> Groups { get; set; }
-        public DbSet<Record> Records { get; set; }
-        public DbSet<Session> Sessions { get; set; }
-        public DbSet<ChangeRequest> ChangeRequests { get; set; }
+        public DbSet<Attendee> Attendee { get; set; }
+        public DbSet<AttendeeGroup> AttendeeGroup { get; set; }
+        public DbSet<Group> Group { get; set; }
+        public DbSet<Record> Record { get; set; }
+        public DbSet<Session> Session { get; set; }
+        public DbSet<ChangeRequest> ChangeRequest { get; set; }
 
         public MainDbContext(DbContextOptions<MainDbContext> options): base(options)
         { }
@@ -47,7 +47,7 @@ namespace AttendanceSystemIPCamera.Framework.Database
                     .IsRequired()
                     .HasColumnType("varchar ( 50 )");
 
-                entity.Property(e => e.IsActive).HasDefaultValueSql("1");
+                entity.Property(e => e.IsActive);
 
                 entity.HasOne(d => d.Attendee)
                     .WithMany(p => p.AttendeeGroups)
@@ -86,7 +86,7 @@ namespace AttendanceSystemIPCamera.Framework.Database
 
                 entity.Property(e => e.DateTimeCreated).HasColumnType("varchar ( 255 )");
 
-                entity.Property(e => e.Deleted).HasDefaultValueSql("0");
+                entity.Property(e => e.Deleted);
 
                 entity.Property(e => e.Name).HasColumnType("varchar ( 100 )");
             });

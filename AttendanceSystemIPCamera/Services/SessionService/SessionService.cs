@@ -28,11 +28,11 @@ namespace AttendanceSystemIPCamera.Services.SessionService
 
         private IMapper mapper;
 
-        public SessionService(MyUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork)
+        public SessionService(MyUnitOfWork unitOfWork) : base(unitOfWork)
         {
             sessionRepository = unitOfWork.SessionRepository;
 
-            this.mapper = mapper;
+            this.mapper = unitOfWork.mapper;
         }
 
         public async Task<List<Session>> AddSessionsIfNotInDbAsync(List<SessionViewModel> sessionVms)
@@ -44,7 +44,13 @@ namespace AttendanceSystemIPCamera.Services.SessionService
                 var sessionInGroupVms = sessionVms.Where(svm => svm.GroupCode == gCode).ToList();
 
                 //find session not exist
-                var sessionVmsNotInDb = GetSessionNotInDb(sessionInGroupVms, gCode);
+                var startTimes = sessionVms.Select(ss => ss.StartTime).ToList();
+                var sessionInDb = sessionRepository.GetByStartTimesAndGroupCode(startTimes, gCode);
+                var startTimesInDb = sessionInDb.Select(s => s.StartTime).ToList();
+                var startTimesNotInDb = startTimes.Where(st => !startTimesInDb.Contains(st)).ToList();
+                var sessionVmsNotInDb = sessionVms.Where(s => startTimesNotInDb.Contains(s.StartTime)).ToList();
+
+                sessionsReturn.AddRange(sessionInDb);
 
                 //save sessions not exist
                 if (sessionVmsNotInDb != null && sessionVmsNotInDb.Count > 0)
@@ -57,7 +63,7 @@ namespace AttendanceSystemIPCamera.Services.SessionService
                         Status = svm.Status,
                         GroupCode = svm.GroupCode
                     });
-                    await this.Add(sessionsNotInDb);
+                    await sessionRepository.Add(sessionsNotInDb);
                     sessionsReturn.AddRange(sessionsNotInDb);
                 }
             }

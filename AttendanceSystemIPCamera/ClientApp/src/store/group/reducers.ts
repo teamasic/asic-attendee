@@ -17,19 +17,10 @@ const unloadedState: GroupsState = {
         id: 1,
         startTime: new Date(),
         attendees: [{
-            id: 1,
             code: 'SE63147',
             name: 'Strawberry',
             email:"",
             image:"",
-            username:""
-        }, {
-            id: 2,
-            code: 'SE63147',
-            name: 'Blackberry',
-            email:"",
-            image:"",
-            username:""
         }]
     }
 };

@@ -14,7 +14,7 @@ namespace AttendanceSystemIPCamera.Framework.ViewModels
         public string SessionName { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public DateTime UpdateTime { get; set; }
+        public DateTime? UpdateTime { get; set; }
         public bool Present { get; set; }
         public int SessionId { get; set; }
         public int AttendeeGroupId { get; set; }
@@ -46,7 +46,7 @@ namespace AttendanceSystemIPCamera.Framework.ViewModels
         public int AttendeeGroupId { get; set; }
         public bool Present { get; set; }
         public int SessionId { get; set; }
-        public DateTime UpdateTime { get; set; }
+        public DateTime? UpdateTime { get; set; }
         public ChangeRequestNetworkViewModel ChangeRequest { get; set; }
     }
 

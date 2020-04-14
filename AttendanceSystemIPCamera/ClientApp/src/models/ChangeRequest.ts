@@ -12,11 +12,9 @@ export enum ChangeRequestStatusFilter {
 
 export default interface ChangeRequest {
     id: number;
-    // record: Record;
     recordId: number;
     attendeeCode: string;
     attendeeName: string;
-    groupId: number;
     groupName: string;
     groupCode: string;
     sessionId: number;
