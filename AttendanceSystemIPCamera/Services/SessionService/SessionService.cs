@@ -62,7 +62,7 @@ namespace AttendanceSystemIPCamera.Services.SessionService
                         EndTime = svm.EndTime,
                         Status = svm.Status,
                         GroupCode = svm.GroupCode
-                    });
+                    }).ToList();
                     await sessionRepository.Add(sessionsNotInDb);
                     sessionsReturn.AddRange(sessionsNotInDb);
                 }
