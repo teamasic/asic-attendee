@@ -12,6 +12,7 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router';
 import { connect } from 'react-redux';
 import { ApplicationState } from '../store';
+import MenuBar from './MenuBar';
 const { Header, Sider, Content, Footer } = Layout;
 
 type LayoutProps =
@@ -55,10 +56,6 @@ class PageLayout extends React.Component<
 							<Icon type="hdd" />
 							<span>Your groups</span>
 						</Menu.Item>
-						{/* <Menu.Item key="2">
-							<Icon type="sync" />
-							<span>Refresh</span>
-						</Menu.Item> */}
 						<Menu.Item key="3" onClick={this.logout}>
 							<Icon type="logout" />
 							<span>Logout</span>
@@ -66,6 +63,7 @@ class PageLayout extends React.Component<
 					</Menu>
 				</Sider>
 				<Layout>
+					<MenuBar />
 					<Content className="content">
 						{this.props.children}
 					</Content>

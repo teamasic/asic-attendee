@@ -1,0 +1,21 @@
+.menu-bar {
+    background: #fff;
+    margin: 0 !important;
+    padding: 16px;
+    padding-right: 32px;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: unset !important;
+    flex: unset !important;
+}
+
+.menu-bar .fullname {
+    margin-right: 15px;
+    float: right;
+}
+
+.menu-bar .avatar {
+    cursor: pointer;
+    margin-right: 15px;
+    float: right;
+}
