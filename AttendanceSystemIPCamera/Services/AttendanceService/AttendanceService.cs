@@ -124,7 +124,8 @@ namespace AttendanceSystemIPCamera.Services.AttendanceService
                         {
                             RecordId = savedRecord.Id,
                             Comment = c.Comment,
-                            Status = c.Status
+                            Status = c.Status,
+                            DateSubmitted = c.DateSubmitted
                         };
                     }).ToList();
                     await unitOfWork.ChangeRequestService.AddOrUpdateChangeRequests(changeRequestVms);

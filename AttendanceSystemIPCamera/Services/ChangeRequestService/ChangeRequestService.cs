@@ -22,7 +22,6 @@ namespace AttendanceSystemIPCamera.Services.ChangeRequestService
     public interface IChangeRequestService : IBaseService<ChangeRequest>
     {
         public Task<ChangeRequest> Add(CreateChangeRequestViewModel viewModel);
-        public Task<ChangeRequest> Process(ProcessChangeRequestViewModel viewModel);
         public Task<IEnumerable<ChangeRequest>> GetAll(SearchChangeRequestViewModel viewModel);
         Task<List<ChangeRequest>> AddOrUpdateChangeRequests(List<ChangeRequestViewModel> changeRequestVms);
     }
@@ -53,15 +52,18 @@ namespace AttendanceSystemIPCamera.Services.ChangeRequestService
             {
                 throw new AppException(HttpStatusCode.NotFound, ErrorMessage.NOT_FOUND_RECORD_WITH_ID, viewModel.RecordId);
             }
+            /*
             if (record.Present == viewModel.Present)
             {
                 throw new AppException(HttpStatusCode.BadRequest, ErrorMessage.CHANGE_REQUEST_INVALID);
             }
+            */
             var newRequest = new ChangeRequest
             {
                 Record = record,
                 Comment = viewModel.Comment,
-                Status = ChangeRequestStatus.UNRESOLVED
+                Status = ChangeRequestStatus.UNRESOLVED,
+                DateSubmitted = DateTime.Now
             };
             await changeRequestRepository.Add(newRequest);
             unitOfWork.Commit();
@@ -72,24 +74,6 @@ namespace AttendanceSystemIPCamera.Services.ChangeRequestService
         public async Task<IEnumerable<ChangeRequest>> GetAll(SearchChangeRequestViewModel viewModel)
         {
             return await changeRequestRepository.GetAll(viewModel);
-        }
-
-        public async Task<ChangeRequest> Process(ProcessChangeRequestViewModel viewModel)
-        {
-            var changeRequest = await changeRequestRepository.GetByIdSimple(viewModel.ChangeRequestId);
-            if (viewModel.Approved)
-            {
-                changeRequest.Record.Present = true;
-                changeRequest.Status = ChangeRequestStatus.APPROVED;
-            }
-            else
-            {
-                changeRequest.Record.Present = false;
-                changeRequest.Status = ChangeRequestStatus.REJECTED;
-            }
-            changeRequestRepository.Update(changeRequest);
-            unitOfWork.Commit();
-            return changeRequest;
         }
  
         public async Task<List<ChangeRequest>> AddOrUpdateChangeRequests(List<ChangeRequestViewModel> changeRequestVms)

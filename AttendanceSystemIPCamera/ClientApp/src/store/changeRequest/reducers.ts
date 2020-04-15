@@ -38,14 +38,6 @@ const reducers: Reducer<ChangeRequestState> = (
                 successfullyLoaded: true,
                 changeRequests: action.changeRequests
             };
-        case ACTIONS.PROCESS_CHANGE_REQUEST:
-            return {
-                ...state,
-                changeRequests: state.changeRequests.map(cr => cr.id === action.id ? {
-                    ...cr,
-                    status: action.approved ? ChangeRequestStatus.APPROVED : ChangeRequestStatus.REJECTED
-                } : cr)
-            };
         case ACTIONS.START_CREATE_CHANGE_REQUEST:
             return {
                 ...state,

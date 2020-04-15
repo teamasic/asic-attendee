@@ -11,7 +11,6 @@ export enum ChangeRequestStatusFilter {
 }
 
 export default interface ChangeRequest {
-    id: number;
     recordId: number;
     attendeeCode: string;
     attendeeName: string;
@@ -22,4 +21,5 @@ export default interface ChangeRequest {
     sessionName: string;
     comment: string;
     status: ChangeRequestStatus;
+    dateSubmitted: Date;
 };

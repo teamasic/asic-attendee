@@ -9,10 +9,9 @@ namespace AttendanceSystemIPCamera.Framework.ViewModels
 {
     public class ChangeRequestSimpleViewModel
     {
-        public int Id { get; set; }
+        public int RecordId { get; set; }
         [JsonIgnore]
         public RecordSimpleViewModel Record { get; set; }
-        public int RecordId => Record.Id;
         public string AttendeeCode => Record.AttendeeGroup?.AttendeeCode;
         //public string AttendeeName => Record.;
         public string GroupName => Record.Session?.Group.Name;

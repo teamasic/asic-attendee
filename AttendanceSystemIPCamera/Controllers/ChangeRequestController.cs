@@ -42,11 +42,11 @@ namespace AttendanceSystemIPCamera.Controllers
         }
 
         [HttpGet("{id}")]
-        public Task<BaseResponse<ChangeRequestSimpleViewModel>> GetChangeRequest(int id)
+        public Task<BaseResponse<ChangeRequestSimpleViewModel>> GetChangeRequest(int recordId)
         {
             return ExecuteInMonitoring(async () =>
             {
-                var changeRequest = await changeRequestService.GetById(id);
+                var changeRequest = await changeRequestService.GetById(recordId);
                 return mapper.Map<ChangeRequestSimpleViewModel>(changeRequest);
             });
         }
@@ -57,16 +57,6 @@ namespace AttendanceSystemIPCamera.Controllers
             return ExecuteInMonitoring(async () =>
             {
                 var newChangeRequest = await changeRequestService.Add(viewModel);
-                return mapper.Map<ChangeRequestSimpleViewModel>(newChangeRequest);
-            });
-        }
-
-        [HttpPut]
-        public Task<BaseResponse<ChangeRequestSimpleViewModel>> Process([FromBody] ProcessChangeRequestViewModel viewModel)
-        {
-            return ExecuteInMonitoring(async () =>
-            {
-                var newChangeRequest = await changeRequestService.Process(viewModel);
                 return mapper.Map<ChangeRequestSimpleViewModel>(newChangeRequest);
             });
         }

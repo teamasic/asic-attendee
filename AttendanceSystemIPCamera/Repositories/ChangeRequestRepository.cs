@@ -28,7 +28,7 @@ namespace AttendanceSystemIPCamera.Repositories
         {
             return await dbSet
                 .Include(cr => cr.Record)
-                .FirstOrDefaultAsync(cr => cr.Id == (int)id);
+                .FirstOrDefaultAsync(cr => cr.RecordId == (int)id);
         }
 
         public new async Task<ChangeRequest> GetById(object id)
@@ -39,7 +39,7 @@ namespace AttendanceSystemIPCamera.Repositories
                 .Include(cr => cr.Record)
                    .ThenInclude(r => r.Session)
                         .ThenInclude(s => s.Group)
-                .FirstOrDefaultAsync(cr => cr.Id == (int)id);
+                .FirstOrDefaultAsync(cr => cr.RecordId == (int)id);
         }
         public async Task<IEnumerable<ChangeRequest>> GetAll(SearchChangeRequestViewModel viewModel)
         {

@@ -64,10 +64,10 @@ namespace AttendanceSystemIPCamera.Services.RecordService
                     {
                         rec.ChangeRequest = new ChangeRequestViewModel
                         {
-                            Id = r.ChangeRequest.Id,
                             Comment = r.ChangeRequest.Comment,
                             RecordId = r.Id,
-                            Status = r.ChangeRequest.Status
+                            Status = r.ChangeRequest.Status,
+                            DateSubmitted = r.ChangeRequest.DateSubmitted
                         };
                     }
                     return rec;

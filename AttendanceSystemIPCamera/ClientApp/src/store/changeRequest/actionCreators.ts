@@ -47,22 +47,6 @@ export const requestChangeRequests = (status: ChangeRequestStatusFilter): AppThu
     }
 };
 
-function receiveProcessChangeRequest(id: number, approved: boolean) {
-    return {
-        type: ACTIONS.PROCESS_CHANGE_REQUEST,
-        id,
-        approved
-    };
-}
-
-export const processChangeRequest = (id: number, approved: boolean): AppThunkAction => async (dispatch, getState) => {
-    dispatch(receiveProcessChangeRequest(id, approved));
-    const apiResponse: ApiResponse = await services.processChangeRequest(id, approved);
-    if (apiResponse.success) {
-        dispatch(receiveProcessChangeRequest(id, approved));
-    }
-};
-
 function startCreateChangeRequest() {
     return {
         type: ACTIONS.START_CREATE_CHANGE_REQUEST
@@ -98,6 +82,5 @@ const createChangeRequest = (changeRequest: CreateChangeRequest,
 
 export const changeRequestActionCreators = {
     requestChangeRequests,
-    processChangeRequest,
     createChangeRequest
 };

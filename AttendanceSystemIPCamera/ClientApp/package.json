@@ -15,7 +15,7 @@
         "classnames": "^2.2.6",
         "connected-react-router": "6.5.2",
         "date-fns": "^2.11.0",
-        "firebase": "^7.9.3",
+        "firebase": "^7.14.0",
         "history": "4.10.1",
         "jquery": "^3.4.1",
         "merge": "1.2.1",
