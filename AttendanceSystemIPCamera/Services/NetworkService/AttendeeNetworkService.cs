@@ -1,4 +1,4 @@
-﻿using AttendanceSystemIPCamera.Framework.ViewModels;
+using AttendanceSystemIPCamera.Framework.ViewModels;
 using AttendanceSystemIPCamera.Models;
 using AttendanceSystemIPCamera.Repositories;
 using AttendanceSystemIPCamera.Repositories.UnitOfWork;
@@ -27,7 +27,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
     public interface IAttendeeNetworkService
     {
         Task<AttendeeViewModel> Refresh(LoginViewModel loginViewModel);
-        public Task<ChangeRequestSimpleViewModel> CreateChangeRequest(CreateChangeRequestViewModel viewModel);
+        public Task<ChangeRequestSimpleViewModel> CreateChangeRequest(CreateChangeRequestNetworkViewModel viewModel);
     }
 
     public class AttendeeNetworkService : IAttendeeNetworkService
@@ -73,7 +73,8 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             throw new BaseException(ErrorMessage.ATTENDEE_NOT_FOUND);
         }
 
-        public async Task<ChangeRequestSimpleViewModel> CreateChangeRequest(CreateChangeRequestViewModel viewModel)
+        public async Task<ChangeRequestSimpleViewModel> CreateChangeRequest(
+            CreateChangeRequestNetworkViewModel viewModel)
         {
             var networkRequest = GetNetworkRequest(NetworkRoute.CHANGE_REQUEST, viewModel);
 

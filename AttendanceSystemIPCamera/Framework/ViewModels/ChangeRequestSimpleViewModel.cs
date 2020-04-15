@@ -14,8 +14,8 @@ namespace AttendanceSystemIPCamera.Framework.ViewModels
         public RecordSimpleViewModel Record { get; set; }
         public string AttendeeCode => Record.AttendeeGroup?.AttendeeCode;
         //public string AttendeeName => Record.;
-        public string GroupName => Record.Session?.Group.Name;
-        public string GroupCode => Record.Session?.Group.Code;
+        public string GroupName => Record.Session?.Group?.Name;
+        public string GroupCode => Record.Session?.Group?.Code;
         public DateTime SessionTime => Record.Session != null ? Record.Session.StartTime : DateTime.MinValue;
         public string SessionName => Record.Session?.Name;
         public int SessionId => Record.Session != null ? Record.Session.Id : 0;

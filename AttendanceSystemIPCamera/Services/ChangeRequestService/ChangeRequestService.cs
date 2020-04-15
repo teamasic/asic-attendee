@@ -67,7 +67,12 @@ namespace AttendanceSystemIPCamera.Services.ChangeRequestService
             };
             await changeRequestRepository.Add(newRequest);
             unitOfWork.Commit();
-            unitOfWork.AttendeeNetworkService.CreateChangeRequest(viewModel);
+            await unitOfWork.AttendeeNetworkService.CreateChangeRequest(new CreateChangeRequestNetworkViewModel { 
+                AttendeeCode = record.AttendeeCode,
+                GroupCode = record.Session.GroupCode,
+                Comment = viewModel.Comment,
+                StartTime = record.StartTime
+            });
             return newRequest;
         }
 
@@ -78,34 +83,17 @@ namespace AttendanceSystemIPCamera.Services.ChangeRequestService
  
         public async Task<List<ChangeRequest>> AddOrUpdateChangeRequests(List<ChangeRequestViewModel> changeRequestVms)
         {
-            var changeRequestReturn = new List<ChangeRequest>();
-
             var recordIds = changeRequestVms.Select(c => c.RecordId).ToList();
             var changeReqsInDb = changeRequestRepository.GetByRecordIds(recordIds);
-            var recordIdsInChangeReqsInDb = changeReqsInDb.Select(c => c.RecordId).ToList();
-            var changeReqsNotInDb = changeRequestVms.Where(c => !recordIdsInChangeReqsInDb.Contains(c.RecordId)).ToList();
 
-            //add change request not exist
-            if(changeReqsNotInDb != null && changeReqsNotInDb.Count > 0)
+            changeReqsInDb.ForEach(c =>
             {
-                var changeReqs = mapper.ProjectTo<ChangeRequestViewModel, ChangeRequest>(changeReqsNotInDb);
-                await changeRequestRepository.Add(changeReqs);
-                unitOfWork.Commit();
-                changeRequestReturn.AddRange(changeReqs);
-            }
-            if(changeReqsInDb != null && changeReqsInDb.Count > 0)
-            {
-                changeReqsInDb.ForEach(c =>
-                {
-                    var changeReqVm = changeRequestVms.First(c => c.RecordId == c.RecordId);
-                    c.Status = changeReqVm.Status;
-                    c.Comment = changeReqVm.Comment;
-                });
-                unitOfWork.Commit();
-                changeRequestReturn.AddRange(changeReqsInDb);
-            }
-
-            return changeRequestReturn;
+                var changeReqVm = changeRequestVms.First(crVM => crVM.RecordId == c.RecordId);
+                c.Status = changeReqVm.Status;
+                c.Comment = changeReqVm.Comment;
+            });
+            unitOfWork.Commit();
+            return changeReqsInDb;
         }
     }
 }

@@ -65,7 +65,7 @@ namespace AttendanceSystemIPCamera.Repositories
                         .ThenInclude(s => s.Group)
                 .Where(filterStatus);
         }
-    
+
         public List<ChangeRequest> GetByRecordIds(List<int> recordIds)
         {
             return Get(c => recordIds.Contains(c.RecordId)).ToList();

@@ -21,6 +21,13 @@ namespace AttendanceSystemIPCamera.Repositories
         {
         }
 
+        public new async Task<Record> GetById(object id)
+        {
+            return await dbSet
+                .Include(r => r.Session)
+                .FirstOrDefaultAsync(r => r.Id == (int) id);
+        }
+
         public List<Record> GetByRecordSearch(SessionSearchViewModel search)
         {
             var records = dbSet.Where(r => r.AttendeeCode == search.AttendeeCode)

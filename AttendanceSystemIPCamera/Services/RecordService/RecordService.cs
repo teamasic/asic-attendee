@@ -93,7 +93,7 @@ namespace AttendanceSystemIPCamera.Services.RecordService
         {
             var recordsReturn = new List<Record>();
             //This attendeeGroupId is in local database since we assigned to
-            var attendeeGroupIds = recordVms.Select(r => r.AttendeeGroupId).ToList();
+            var attendeeGroupIds = recordVms.Select(r => r.AttendeeGroupId).ToHashSet();
             foreach (var attendeeGroupId in attendeeGroupIds)
             {
                 //This sessionIds is in local database since we assigned to

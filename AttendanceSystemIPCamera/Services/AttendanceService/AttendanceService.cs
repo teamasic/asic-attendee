@@ -118,8 +118,10 @@ namespace AttendanceSystemIPCamera.Services.AttendanceService
                                                                   .Where(c => c != null);
                     var changeRequestVms = changeRequestNetworkVms.Select(c =>
                     {
-                        //update real recordId
-                        var savedRecord = savedRecords.First(r => r.Id == c.RecordId);
+                        var ownerRecord = recordNetworkVms.FirstOrDefault(r => r.Id == c.RecordId);
+                        var fullRecordData = recordVms[recordNetworkVms.IndexOf(ownerRecord)];
+                        var savedRecord = savedRecords
+                            .FirstOrDefault(sr => sr.StartTime == fullRecordData.StartTime);
                         return new ChangeRequestViewModel()
                         {
                             RecordId = savedRecord.Id,
