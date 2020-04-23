@@ -44,7 +44,7 @@ namespace AttendanceSystemIPCamera.Services.SessionService
                 var sessionInGroupVms = sessionVms.Where(svm => svm.GroupCode == gCode).ToList();
 
                 //find session not exist
-                var startTimes = sessionVms.Select(ss => ss.StartTime).ToList();
+                var startTimes = sessionInGroupVms.Select(ss => ss.StartTime).ToList();
                 var sessionInDb = sessionRepository.GetByStartTimesAndGroupCode(startTimes, gCode);
                 var startTimesInDb = sessionInDb.Select(s => s.StartTime).ToList();
                 var startTimesNotInDb = startTimes.Where(st => !startTimesInDb.Contains(st)).ToList();

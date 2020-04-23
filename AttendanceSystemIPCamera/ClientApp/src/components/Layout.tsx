@@ -50,7 +50,15 @@ class PageLayout extends React.Component<
 					collapsed={this.state.collapsed}
 					onCollapse={this.onCollapse}
 				>
-					<div className="logo">ASIC</div>
+					<div className="logo" >
+						<img
+							src="asic_logo.jpg"
+							style={{
+								backgroundSize: 'contain',
+                                backgroundPosition: 'center',
+								borderRadius: '5px'
+							}} />
+					</div>
 					<Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
 						<Menu.Item key="1">
 							<Icon type="hdd" />
