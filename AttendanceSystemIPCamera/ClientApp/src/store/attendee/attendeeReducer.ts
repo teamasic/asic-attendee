@@ -49,7 +49,8 @@ const reducers: Reducer<AttendeeState> = (state: AttendeeState | undefined, inco
         case ACTIONS.USER_INFO_NOT_IN_LOCAL:
             return {
                 ...state,
-                isLogin: false
+                isLogin: false,
+                successfullyLoaded: true
             }
         case ACTIONS.LOG_OUT:
             return {
