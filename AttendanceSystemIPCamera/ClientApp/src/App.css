@@ -60,11 +60,11 @@ code {
     margin-bottom: 10px;
 }
 
-.change-request-modal .label, .change-request-modal .ant-form-item-label {
+.change-request-modal .label,
+.change-request-modal .ant-form-item-label {
     display: inline-block;
     font-weight: bold;
 }
-
 
 .change-request-modal .info-wrapper {
     margin-bottom: 15px;
@@ -76,7 +76,7 @@ code {
 
 .change-request-modal .info-wrapper .info {
     display: inline-block;
-    border-bottom: 0.5px solid rgba(0,0,0,0.12);
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.12);
     padding: 5px;
 }
 
@@ -86,7 +86,7 @@ code {
 }
 
 .comment-wrapper {
-    border: 1px solid rgba(0,0,0,0.12);
+    border: 1px solid rgba(0, 0, 0, 0.12);
     padding: 5px;
     min-height: 120px;
     border-radius: 4px;
@@ -94,4 +94,17 @@ code {
 
 .to-session-button {
     padding: 0 !important;
+}
+
+.logo img {
+    max-width: 100%;
+    max-height: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.logo {
+    height: auto;
+    background: none !important;
 }

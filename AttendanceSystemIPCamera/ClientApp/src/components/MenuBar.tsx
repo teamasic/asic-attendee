@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 import { ApplicationState } from '../store';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -24,8 +24,8 @@ type Props =
 class MenuBar extends React.Component<Props> {
 	render() {
 		return <Content className="menu-bar row">
-			<div className="fullname">{this.props.attendee.name}</div>
-			<Avatar className="avatar" src={this.props.attendee.image} />
+				<Avatar className="avatar" src={this.props.attendee.image} />
+				<div className="fullname">{this.props.attendee.name}</div>
 			</Content>;
 	}
 }
@@ -33,7 +33,5 @@ class MenuBar extends React.Component<Props> {
 export default withRouter(connect(
 	(state: ApplicationState) => ({
 		...state.attendee,
-	}), // Selects which state properties are merged into the component's props
-	dispatch => bindActionCreators({
-	}, dispatch) // Selects which action creators are merged into the component's props
+	})
 )(MenuBar as any));
