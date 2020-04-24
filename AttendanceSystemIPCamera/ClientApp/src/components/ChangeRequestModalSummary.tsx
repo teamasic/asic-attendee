@@ -55,6 +55,12 @@ class ChangeRequestModalSummary extends React.PureComponent<Props, ChangeRequest
                     <span className="status">Unresolved</span>
                 </>;
                 break;
+            case ChangeRequestStatus.EXPIRED:
+                status = <>
+                    <Icon type="stop" />
+                    <span className="status">Expired</span>
+                </>;
+                break;
         }
         let sessionTime;
         try {
