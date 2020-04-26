@@ -16,6 +16,10 @@ namespace AttendanceSystemIPCamera.Framework
             public const string AES_KEY_PATH = "aes";
 
             public const string LOG_TEMPLATE = "Logs/attendee-log-{0}.txt";
+
+            public const int TIME_OUT = 10 * 1000; // time out in network service
+
+            public const int MAX_TRY_TIMES = 2; // max try time in network service
         }
 
         public class NetworkRoute

@@ -27,7 +27,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
     public interface IAttendeeNetworkService
     {
         Task<AttendeeViewModel> Refresh(LoginViewModel loginViewModel);
-        public Task<ChangeRequestSimpleViewModel> CreateChangeRequest(CreateChangeRequestNetworkViewModel viewModel);
+        Task<ChangeRequestSimpleViewModel> CreateChangeRequest(CreateChangeRequestNetworkViewModel viewModel);
     }
 
     public class AttendeeNetworkService : IAttendeeNetworkService
@@ -38,31 +38,27 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
         { get => NetworkUtils.SupervisorAddress; set => NetworkUtils.SupervisorAddress = value; }
 
         private MyUnitOfWork unitOfWork;
-        //private IAttendanceService attendanceService;
-
-        private const int MAX_TRY_TIMES = 2;
-        private const int TIME_OUT = 20 * 1000;
 
         private Communicator communicator;
 
         public AttendeeNetworkService(MyUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
-            //this.attendanceService = unitOfWork.AttendanceService;
         }
 
         public async Task<AttendeeViewModel> Refresh(LoginViewModel loginViewModel)
         {
             //prepare request
             var networkRequest = GetNetworkRequest(NetworkRoute.REFRESH_ATTENDANCE_DATA, loginViewModel);
-
             string reqMess = JsonConvert.SerializeObject(networkRequest);
+
             //send request
             object responseData = await SendRequest(reqMess);
             if (responseData == null)
             {
                 throw new BaseException(ErrorMessage.NETWORK_ERROR);
             }
+
             //process response
             var attendanceInfo = JsonConvert.DeserializeObject<AttendanceNetworkViewModel>(responseData.ToString());
             if (attendanceInfo != null && attendanceInfo.Success)
@@ -77,8 +73,8 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
             CreateChangeRequestNetworkViewModel viewModel)
         {
             var networkRequest = GetNetworkRequest(NetworkRoute.CHANGE_REQUEST, viewModel);
-
             string reqMess = JsonConvert.SerializeObject(networkRequest);
+
             object responseData = await SendRequest(reqMess);
             if (responseData == null)
             {
@@ -111,7 +107,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
                 try
                 {
                     var cts = new CancellationTokenSource();
-                    cts.CancelAfter(TIME_OUT);//request timeout after TIME_OUT milisec
+                    cts.CancelAfter(Constant.TIME_OUT);     //request timeout after TIME_OUT milisec
 
                     var receiveTask = Task.Run(() =>
                     {
@@ -141,7 +137,7 @@ namespace AttendanceSystemIPCamera.Services.NetworkService
                     this.supervisorIPAddress = IPAddress.Broadcast; // reset to ip broadcast
                 }
                 i++;
-            } while (isContinue && i < MAX_TRY_TIMES);
+            } while (isContinue && i < Constant.MAX_TRY_TIMES);
             return responseData;
         }
 

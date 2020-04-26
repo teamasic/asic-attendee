@@ -84,7 +84,7 @@ namespace AttendanceSystemIPCamera.Services.RecordService
             await unitOfWork.AttendeeNetworkService.Refresh(new LoginViewModel()
             {
                 AttendeeCode = attendee.Code,
-                LoginMethod = Constant.GET_DATA_BY_ATTENDEE_CODE
+                Method = Constant.GET_DATA_BY_ATTENDEE_CODE
             });
             return GetRecord(searchViewModel);
         }
