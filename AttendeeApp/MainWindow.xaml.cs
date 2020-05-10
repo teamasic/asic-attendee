@@ -1,4 +1,6 @@
 ﻿using AttendeeApp.Handler;
+using CefSharp;
+using CefSharp.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,10 +23,26 @@ namespace AttendeeWPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        private ChromiumWebBrowser browser;
+        private string initUrl = "https://localhost:44369/";
+
         public MainWindow()
         {
             InitializeComponent();
-            this.Browser.RequestHandler = new CustomRequestHandler();
+            InitBrowser();
+        }
+
+        private void InitBrowser()
+        {
+            CefSettings settings = new CefSettings();
+            settings.CachePath = "BrowserCache";
+
+            Cef.Initialize(settings);
+
+            browser = new ChromiumWebBrowser(initUrl);
+            browser.RequestHandler = new CustomRequestHandler();
+
+            grid.Children.Add(browser);
         }
     }
 }

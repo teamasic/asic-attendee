@@ -16,7 +16,7 @@ namespace AttendanceSystemIPCamera
         {
             CreateHostBuilder(args).ConfigureLogging((hostingContext, logging) =>
             {
-                logging.AddConsole();
+                logging.AddConsole();   
                 logging.AddDebug();
                 logging.AddEventSourceLogger();
             }).Build().Run();

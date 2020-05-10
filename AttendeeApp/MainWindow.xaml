@@ -7,9 +7,9 @@
         xmlns:local="clr-namespace:AttendeeWPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <Grid x:Name="grid">
         <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="0,1">
-            <wpf:ChromiumWebBrowser x:Name="Browser" Address="https://localhost:44369/"/>
+            <!--<wpf:ChromiumWebBrowser x:Name="Browser" Address="https://localhost:44369/"/>-->
         </Border>
     </Grid>
 </Window>
